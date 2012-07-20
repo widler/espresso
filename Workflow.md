@@ -708,7 +708,7 @@ app.run
 **Example:** - Keeping sessions in mongodb
 
 ```bash
-#> gem install rack-session-mongo
+    $ gem install rack-session-mongo
 ```
 
 ```ruby
@@ -1178,9 +1178,11 @@ send_files '/path/to/dir'
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Attachment
 
-**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 `attachment` works as `send_file` except it will instruct browser to display Save dialog.
 
