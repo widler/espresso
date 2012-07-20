@@ -1,0 +1,13 @@
+--readme README.md
+--markup markdown
+--title 'Espresso Framework Documentation'
+--charset utf-8
+lib/**/*.rb
+-
+Intro.md
+Routing.md
+Setup.md
+Workflow.md
+CRUD.md
+ViewAPI.md
+Deploy.md
