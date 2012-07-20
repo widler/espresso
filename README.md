@@ -34,33 +34,34 @@ App.run
 
 <hr/>
 
+# Tutorial
+
 ### Intro
 
 [Actions](https://github.com/slivu/espresso/blob/master/Intro.md#actions) |
 [Controllers](https://github.com/slivu/espresso/blob/master/Intro.md#controllers) |
-[Slices](https://github.com/slivu/espresso/blob/master/Intro.md#slices)
+[Slices](https://github.com/slivu/espresso/blob/master/Intro.md#slices) |
 [MVC?](https://github.com/slivu/espresso/blob/master/Intro.md#mvc)
 
 ### Routing
-[Base URL](https://github.com/slivu/espresso/blob/master/Routing.md#base-url) |
-[Canonicals](https://github.com/slivu/espresso/blob/master/Routing.md#canonicals) |
-[Actions](https://github.com/slivu/espresso/blob/master/Routing.md#actions) |
-[Actions Mapping](https://github.com/slivu/espresso/blob/master/Routing.md#actions-mapping) |
-[Parametrization](https://github.com/slivu/espresso/blob/master/Routing.md#parametrization) |
-[RESTful Actions](https://github.com/slivu/espresso/blob/master/Routing.md#restful-actions) |
-[Aliases](https://github.com/slivu/espresso/blob/master/Routing.md#aliases) |
-[Rewriter](https://github.com/slivu/espresso/blob/master/Routing.md#rewriter)
+
+[Base URL](https://github.com/slivu/grace/blob/master/Routing.md#base-url) |
+[Canonicals](https://github.com/slivu/grace/blob/master/Routing.md#canonicals) |
+[Actions](https://github.com/slivu/grace/blob/master/Routing.md#actions) |
+[Actions Mapping](https://github.com/slivu/grace/blob/master/Routing.md#actions-mapping) |
+[Parametrization](https://github.com/slivu/grace/blob/master/Routing.md#parametrization) |
+[Format](https://github.com/slivu/grace/blob/master/Routing.md#format) |
+[RESTful Actions](https://github.com/slivu/grace/blob/master/Routing.md#restful-actions) |
+[Aliases](https://github.com/slivu/grace/blob/master/Routing.md#aliases) |
+[Rewriter](https://github.com/slivu/grace/blob/master/Routing.md#rewriter)
+
 
 ### Setup
 
-[Content Type](https://github.com/slivu/espresso/blob/master/Setup.md#content-type) |
-[Charset](https://github.com/slivu/espresso/blob/master/Setup.md#charset) |
-[Format](https://github.com/slivu/espresso/blob/master/Setup.md#format) |
-[Error Handling](https://github.com/slivu/espresso/blob/master/Setup.md#error-handling) |
-[Hooks](https://github.com/slivu/espresso/blob/master/Setup.md#hooks) |
-[Authorization](https://github.com/slivu/espresso/blob/master/Setup.md#authorization) |
-[Sessions](https://github.com/slivu/espresso/blob/master/Setup.md#sessions) |
-[Rack Middleware](https://github.com/slivu/espresso/blob/master/Setup.md#rack-middleware)
+[Global Setup](https://github.com/slivu/grace/blob/master/Setup.md#global-setup) |
+[Setup by Name](https://github.com/slivu/grace/blob/master/Setup.md#setup-by-name) |
+[Setup by Format](https://github.com/slivu/grace/blob/master/Setup.md#setup-by-format) |
+[Remote Setup](https://github.com/slivu/grace/blob/master/Setup.md#remote-setup)
 
 ### Workflow
 
@@ -104,6 +105,14 @@ App.run
 [Rendering Files](https://github.com/slivu/espresso/blob/master/ViewAPI.md#rendering-files) |
 [Ad hoc Engines](https://github.com/slivu/espresso/blob/master/ViewAPI.md#ad-hoc-engines) |
 [Templates Compilation](https://github.com/slivu/espresso/blob/master/ViewAPI.md#templates-compilation)
+
+### CRUD
+
+[Intro](https://github.com/slivu/grace/blob/master/CRUD.md#intro) |
+[Resource](https://github.com/slivu/grace/blob/master/CRUD.md#resource) |
+[Root](https://github.com/slivu/grace/blob/master/CRUD.md#root) |
+[Response](https://github.com/slivu/grace/blob/master/CRUD.md#response) |
+[Access Restriction](https://github.com/slivu/grace/blob/master/CRUD.md#access-restriction)
 
 ### Deploy
 

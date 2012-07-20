@@ -3,6 +3,7 @@
 
 ## Engine
 
+
 Template engine can be set globally, at class level, then inside actions you simply call `render` and counterparts.
 
 This way you can change your engine for an entire app with minimal impact, without refactoring a single action.
@@ -52,7 +53,11 @@ engine :Erubis, default_encoding: Encoding.default_external
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Extension
+
 
 Espresso will use the default extension of current engine.
 
@@ -69,7 +74,11 @@ class App < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Templates path
+
 
 By default, Espresso will look for templates in "view/" folder, inside your app root.
 
@@ -120,7 +129,10 @@ class News < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 ## Layouts path
+
 
 By default, Espresso will look for layouts in same folder as templates, i.e., in "view/"
 
@@ -136,7 +148,12 @@ class App < Ruby
 end
 ```
 
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Layout
+
 
 By default no layouts will be searched/rendered.
 
@@ -177,9 +194,13 @@ class App < Ruby
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 # Render
 
 ## Rendering Actions/Templates
+
 
 Here we will speak about `render` and `render_partial` methods.
 
@@ -293,7 +314,11 @@ render_partial "users/online", :some_var => "some val"
 etc.
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Rendering Layouts
+
 
 
 `render_layout` will render the layout of current(or given) action or an arbitrary layout.
@@ -394,8 +419,11 @@ end
 ```
 
 
-Rendering Files
----
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
+## Rendering Files
+
 
 `render_file` will render an arbitrary file at the path given as first argument.
 
@@ -428,8 +456,11 @@ or engine defined for all actions,
 or default engine - ERB.
 
 
-Ad hoc Engines
----
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
+## Ad hoc Engines
+
 
 `render_{engine}` method used for cases when a template should be "quickly" rendered
 using a specific engine, without any previous class level setups.
@@ -450,8 +481,11 @@ If both a file and a block given, the given file will be treated as a layout,
 so it should contain the `yield` statement
 that will be replaced with the string returned by given block.
 
-Templates Compilation
----
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
+## Templates Compilation
+
 
 For most web sites, most time are spent at templates rendering.<br/>
 When rendering templates, most time are spent at reading and compiling.
@@ -505,3 +539,5 @@ class App < E
     end
 end
 ```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

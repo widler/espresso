@@ -37,7 +37,11 @@ app.mount /Controller/
 app.run
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Slices
+
 
 Wrap the app into a slice(module) and run:
 
@@ -64,7 +68,11 @@ app.run
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Roots
+
 
 To mount a controller/slice into a specific root, pass it as first argument:
 
@@ -99,7 +107,11 @@ app.mount Forum, '/forum', '/Forums'
 app.run
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Run
+
 
 By default Espresso will use WEBrick server and default WEBrick port.
 
@@ -119,7 +131,11 @@ app.run :server => :Thin
 app.run :server => :EventedMongrel, :Port => 9090, :num_processors => 100
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## config.ru
+
 
 Running a single controller:
 
@@ -149,3 +165,5 @@ app = EApp.new :automount
 
 run app
 ```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

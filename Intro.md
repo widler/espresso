@@ -16,7 +16,11 @@ end
 It is really straightforward to define actions in Espresso cause they are usual Ruby methods.
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Controllers
+
 
 A controller is meant to organize and setup actions.
 
@@ -52,7 +56,11 @@ end
 
 That's it, controllers are usual Ruby classes with inheritance from Espresso class.
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Slices
+
 
 A slice is meant to organize and setup controllers.
 
@@ -146,7 +154,11 @@ app = Cms.mount '/cms' do |ctrl|
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## MVC?
+
 
 Though you can create pure MVC applications by using Espresso Framework,
 it does not actually impose any design patterns.
@@ -155,3 +167,4 @@ You are the creator and you are free to choose how to develop your app.
 
 The "Controller" term in Espresso Framework does not necessarily refers to the "Controller" term in MVC.
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

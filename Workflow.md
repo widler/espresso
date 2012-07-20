@@ -2,7 +2,6 @@
 ## Route
 
 
-
 Use `route` at class or instance level to get the URL of given action.
 
 Returned URL will consist of app's base URL and the action's path.
@@ -195,9 +194,10 @@ Index[:blah]
 #=> nil
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Params
-
 
 
 `params` - a mix of GET and POST params. Can be accessed by both symbol and string keys.
@@ -219,9 +219,10 @@ class App < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Passing Control
-
 
 
 To pass control to another action or even app, use `pass`
@@ -283,8 +284,10 @@ class Index < E
 end
 ```
 
-## Fetching Body
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Fetching Body
 
 
 Sometimes you need to invoke some action or app and get the returned body.
@@ -323,8 +326,10 @@ end
 
 If you need status code and/or headers, use `invoke` instead, which will return a Rack response Array.
 
-## Halt
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Halt
 
 
 `halt` will interrupt any process and send an arbitrary resopnse to browser.
@@ -375,8 +380,10 @@ def download
 end
 ```
 
-## Redirect
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Redirect
 
 
 `redirect` will interrupt any process and redirect browser to new address with status code 302.
@@ -412,9 +419,10 @@ class Articles < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Reload
-
 
 
 `reload`  will simply refresh the page.
@@ -437,7 +445,12 @@ def index
 end
 ```
 
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Streaming
+
 
 There are no doubts that Sinatra's streaming implementation is really elegant and powerful.
 
@@ -464,8 +477,10 @@ end
 Please note that this will work as expected only on servers that does support streaming.
 
 
-## Error Handlers
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Error Handlers
 
 
 Espresso allow to set error handlers that can be used to throw errors with desired status code and body.
@@ -533,9 +548,10 @@ class App < E
 end
 ```
 
-
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 ## Hooks
+
 
 `before` and `after` allow to set callbacks to be called before and after action processed.
 
@@ -581,7 +597,10 @@ class App < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 ## Authorization
+
 
 Types supported:
 
@@ -638,6 +657,9 @@ app = Admin.mount do
 end
 app.run
 ```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Sessions
 
@@ -747,7 +769,11 @@ end
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Flash
+
 
 Burn after reading! :)
 
@@ -769,8 +795,10 @@ flash[:message]
 #=> nil
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 ## Cookies
+
 
 
 **Example:** - Setting cookies
@@ -828,9 +856,10 @@ end
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Content Type
-
 
 
 Can be set at class and/or instance level.
@@ -872,9 +901,10 @@ class App < E
 end
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Charset
-
 
 
 Updating Content-Type header by adding specified charset.
@@ -883,9 +913,10 @@ Can be set exactly as Content-Type, at class and/or instance level.
 
 **Important:** - `charset` will update only the header, so make sure that returned body is of same charset as header, if that needed at all.
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Cache Control
-
 
 
 Control content freshness by setting Cache-Control header.
@@ -938,8 +969,10 @@ end
 
 *Please note* that at instance level bang method should be used.
 
-## Expires
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Expires
 
 
 Set Expires header and update Cache-Control by adding directives and setting max-age value.
@@ -963,8 +996,10 @@ def some_action
 end
 ```
 
-## Last Modified
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Last Modified
 
 
 Set the "Last-Modified" header indicating last modified time of the resource.
@@ -986,8 +1021,10 @@ end
 ```
 
 
-## Accepted Content Type
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
+## Accepted Content Type
 
 
 Usually the browser inform the app about accepted content type with HTTP_ACCEPT header.
@@ -1036,8 +1073,10 @@ accept_language? /en\-(gb|us)/
 accept_ranges? 'bytes'
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 ## Cache Manager
+
 
 Allow to cache the result of an arbitrary block and use the result on consequent requests.
 
@@ -1087,7 +1126,12 @@ Just make sure your pool behaves like a Hash,
 Meant it should respond to `[]=`, `[]`, `delete` and `clear`
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Send File
+
+
 
 `send_file` will send file content to browser, inline.
 
@@ -1118,8 +1162,12 @@ send_file '/path/to/file', :cache_control => 'max-age=3600, public, must-revalid
 Recommended to use only with small files.<br/>
 Or setup your web server to make use of X-Sendfile and use Rack::Sendfile.
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Send Files
+
+
 
 `send_files` allow to serve static files from a given directory.
 
@@ -1132,6 +1180,8 @@ send_files '/path/to/dir'
 
 ## Attachment
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 `attachment` works as `send_file` except it will instruct browser to display Save dialog.
 
 **Example:**
@@ -1140,7 +1190,12 @@ send_files '/path/to/dir'
 attachment '/path/to/file'
 ```
 
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Headers
+
 
 `response.headers`, or just `response[]`, allow to read/set headers to be sent to browser.
 
@@ -1157,3 +1212,5 @@ response['Max-Forwards']
 
 # browser will receive Max-Forwards=5 header
 ```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

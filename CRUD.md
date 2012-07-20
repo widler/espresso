@@ -1,4 +1,7 @@
 
+## Intro
+
+
 `crudify` method will automatically create CRUD actions that will map HTTP requests to corresponding methods on given Resource.
 
 <pre>
@@ -12,7 +15,11 @@ HEAD    /id                    #get(id)
 OPTIONS /                      returns actions available to client
 </pre>
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Resource
+
 
 First argument is required and should provide the CRUDified resource.<br/>
 Resource should respond to `get` and `create` methods.<br/>
@@ -38,7 +45,11 @@ simply map `post` action to `new` method:
 crudify ModelName, :post => :new
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Root
+
 
 By default, `crudify` will create actions that respond to controllers root.
 
@@ -72,7 +83,11 @@ end
 # etc.
 ```
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Response
+
 
 By default, objects are returned to client as they fetched from resource.<br/>
 To prepare them accordingly before sending to client, use a block.<br/>
@@ -103,7 +118,11 @@ Also `content_type` is used to set proper content type.
 
 DELETE action does not need a handler cause it ever returns an empty string.
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Access Restriction
+
 
 Using `auth` will instruct client to require authorization.<br/>
 Access can be restricted to some or all actions.
@@ -145,3 +164,5 @@ class App < E
     crudify UsersModel, :users
 end
 ```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

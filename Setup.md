@@ -1,7 +1,6 @@
 
 ## Global Setup
 
-**[ [contents &uarr;](https://github.com/slivu/router#tutorial) ]**
 
 The main idea behind actions setup is to easily manipulate the action's behavior
 without touching the actions et all.
@@ -26,9 +25,11 @@ And when you need your actions to return another charset,
 simply change a single line of code at class level.
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Setup by Name
 
-**[ [contents &uarr;](https://github.com/slivu/router#tutorial) ]**
 
 Global setup is just good for mostly trivial apps.
 
@@ -70,11 +71,13 @@ end
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Setup by Format
 
-**[ [contents &uarr;](https://github.com/slivu/router#tutorial) ]**
 
-[Format](https://github.com/slivu/router/blob/master/Routing.md#format) is a part of routing mechanism
+[Format](https://github.com/slivu/espresso/blob/master/Routing.md#format) is a part of routing mechanism
 but it is also hugely used when it comes to setup actions.
 
 It turns out that setting up actions by name and regular expressions are not enough.
@@ -133,9 +136,11 @@ end
 ```
 
 
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
 ## Remote Setup
 
-**[ [contents &uarr;](https://github.com/slivu/router#tutorial) ]**
 
 Any Espresso controller or slice can be packed as a gem then installed on any server.<br/>
 Very useful when you need distributed apps.
@@ -169,3 +174,5 @@ That's it.
 
 *Please note* bang method, it will ensure that initial setup will be overridden.<br/>
 There are bang methods for all Espresso setups.
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
