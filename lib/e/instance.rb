@@ -338,7 +338,7 @@ class E
   end
 
   def app_root
-    self.class.app_root
+    self.class.app.root
   end
 
   # The response object. See Rack::Response and Rack::ResponseHelpers for more info:

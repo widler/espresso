@@ -26,6 +26,9 @@ class EApp
 
   module Setup
 
+    include ::AppetiteUtils
+    include ::AppetiteHelpers
+
     # set/get app root
     def root path = nil
       @root = ('%s/' % path).sub(/\/+\Z/, '/').freeze if path
