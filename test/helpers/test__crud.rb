@@ -1,4 +1,4 @@
-module EHTTPTest__CRUD
+module EHelpersTest__CRUD
 
   class Resource
 

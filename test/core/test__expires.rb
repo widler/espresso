@@ -1,4 +1,4 @@
-module EHTTPTest__Expires
+module ECoreTest__Expires
 
   GENERIC_AMOUNT = 600
   GENERIC = [:public, :must_revalidate]

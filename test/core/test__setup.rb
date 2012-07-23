@@ -1,4 +1,4 @@
-module EHTTPTest__Setup
+module ECoreTest__Setup
 
   SliceSetup = lambda do
 

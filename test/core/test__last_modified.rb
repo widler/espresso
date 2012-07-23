@@ -1,4 +1,4 @@
-module EHTTPTest__LastModified
+module ECoreTest__LastModified
 
   class App < E
 

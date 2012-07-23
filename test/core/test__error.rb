@@ -1,4 +1,4 @@
-module EHTTPTest__Error
+module ECoreTest__Error
 
   class App < E
 

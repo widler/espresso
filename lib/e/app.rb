@@ -1,6 +1,6 @@
 class EApp
 
-  include ::MeisterUtils
+  include ::AppetiteUtils
 
   # Rack interface to all found controllers
   #
@@ -345,14 +345,14 @@ class EApp
       ctrl.lock! if locked?
     end
     rewrite_rules.size > 0 ?
-        ::MeisterRewriter.new(rewrite_rules, builder.to_app) :
+        ::AppetiteRewriter.new(rewrite_rules, builder.to_app) :
         builder.to_app
   end
 
   def discover_controllers namespace = nil
     controllers = ::ObjectSpace.each_object(::Class).
         select { |c| is_app?(c) }.
-        reject { |c| [::Meister, ::MeisterRewriter, ::E].include? c }
+        reject { |c| [::Appetite, ::AppetiteRewriter, ::E].include? c }
     return controllers unless namespace
 
     namespace.is_a?(Regexp) ?

@@ -1,4 +1,4 @@
-module EHTTPTest__Cache
+module EHelpersTest__Cache
 
   class App < E
 

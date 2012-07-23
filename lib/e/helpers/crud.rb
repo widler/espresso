@@ -59,7 +59,7 @@ class << E
       end
 
       define_method action % :options do
-        ::MeisterConstants::REQUEST_METHODS.map do |request_method|
+        ::AppetiteConstants::REQUEST_METHODS.map do |request_method|
           if restriction = self.class.restrictions?((action % request_method.downcase).to_sym)
             auth_class, auth_args, auth_proc = restriction
             auth_class.new(proc {}, *auth_args, &auth_proc).call(env) ? nil : request_method

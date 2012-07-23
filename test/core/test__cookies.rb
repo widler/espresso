@@ -1,4 +1,4 @@
-module EHTTPTest__Cookies
+module ECoreTest__Cookies
 
   class App < E
 

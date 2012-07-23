@@ -1,4 +1,4 @@
-module EHTTPTest__Params
+module ECoreTest__Params
 
   class App < E
 

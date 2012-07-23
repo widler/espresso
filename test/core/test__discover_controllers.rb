@@ -1,4 +1,4 @@
-module EHTTPTest__DiscoverControllers
+module ECoreTest__DiscoverControllers
 
   class ControllerNumberOne < E
     map '/'
@@ -25,7 +25,7 @@ module EHTTPTest__DiscoverControllers
       expect(last_response.status) == 404
 
       Should 'also work with full qualified name' do
-        app EApp.new(false).mount('EHTTPTest__DiscoverControllers::ControllerNumberTwo')
+        app EApp.new(false).mount('ECoreTest__DiscoverControllers::ControllerNumberTwo')
         get :one
         expect(last_response.status) == 404
         get :two

@@ -1,4 +1,4 @@
-module EHTTPTest__Canonical
+module ECoreTest__Canonical
 
   class App < E
     map '/', '/cms', '/pages'
@@ -15,7 +15,7 @@ module EHTTPTest__Canonical
 
   module Hlp
     def ok? response
-      check(response.status) == MeisterConstants::STATUS__OK
+      check(response.status) == AppetiteConstants::STATUS__OK
     end
   end
 

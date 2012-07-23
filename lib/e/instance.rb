@@ -3,78 +3,348 @@ class E
   alias orig_params params
   alias orig_cookies cookies
 
+  # overriding Appetite's action invocation
+  def action__invoke &proc
+    if (restriction = self.class.restrictions?(action_with_format))
+      auth_class, auth_opts, auth_proc = restriction
+      (auth_request = auth_class.new(proc {}, auth_opts, &auth_proc).call(env)) && halt(auth_request)
+    end
+
+    (cache_control = cache_control?) && cache_control!(*cache_control)
+    (expires = expires?) && expires!(*expires)
+    (content_type = format? ? mime_type(format) : content_type?) && content_type!(content_type)
+    (charset = __e__.explicit_charset || charset?) && charset!(charset)
+
+    (self.class.hooks?(:a, action_with_format)||[]).each { |m| self.send m }
+
+    super
+
+    (self.class.hooks?(:z, action_with_format)||[]).each { |m| self.send m }
+  end
+
   # this proxy used to keep methods that rely on instance variables,
   # so the app instance namespace stays pristine,
   # and user defined variables wont clash with builtin variables.
   def __e__
-    @__e__ ||= EInstanceVariables.new self
+    @__e__ ||= EspressoFrameworkInstanceVariables.new self
+  end
+
+  def response
+    __e__.response ||= EspressoFrameworkResponse.new
+  end
+
+  def params
+    __e__.params ||= indifferent_params(orig_params)
+  end
+
+  def get_params
+    __e__.get_params ||= indifferent_params(self.GET)
+  end
+
+  def post_params
+    __e__.post_params ||= indifferent_params(self.POST)
+  end
+
+  %w[ session flash cookies ].each do |m|
+    define_method m do
+      __e__.send m
+    end
+  end
+
+  def user
+    env['REMOTE_USER']
+  end
+
+  alias user? user
+
+  %w[ escape_html
+        unescape_html
+        escape_element
+        unescape_element
+        rfc1123_date
+        pretty  ].map { |m| m.to_sym }.each do |m|
+    define_method m do |*args|
+      ::CGI.send(m, *args)
+    end
+  end
+
+  # getting various setups accepted by browser.
+  # `accept?` is for content type, `accept_charset?` for charset etc.
+  # as per W3C specification.
+  #
+  # useful when your API need to know about browser's expectations.
+  #
+  # @example
+  #    accept? 'json'
+  #    accept? /xml/
+  #    accept_charset? 'UTF-8'
+  #    accept_charset? /iso/
+  #    accept_encoding? 'gzip'
+  #    accept_encoding? /zip/
+  #    accept_language? 'en-gb'
+  #    accept_language? /en\-(gb|us)/
+  #    accept_ranges? 'bytes'
+  #
+  ['', '_charset', '_encoding', '_language', '_ranges'].each do |field|
+    define_method 'accept' << field do
+      __e__.send(__method__) ||
+          __e__.send('%s=' % __method__, env['HTTP_ACCEPT' << field.upcase].to_s)
+    end
+
+    define_method 'accept%s?' % field do |value|
+      self.send('accept' << field) =~ value.is_a?(Regexp) ? value : /#{value}/
+    end
+  end
+
+  # set Content-Type header
+  #
+  # Content-Type will be guessed by passing given type to `mime_type`
+  #
+  # if second arg given, it will be added as charset
+  #
+  # you do not need to manually set Content-Type inside each action.
+  # this can be done automatically by using `content_type` at class level
+  #
+  # @example set Content-Type at class level for all actions
+  #    class App < E
+  #      # ...
+  #      content_type '.json'
+  #    end
+  #
+  # @example set Content-Type at class level for :news and :feed actions
+  #    class App < E
+  #      # ...
+  #      setup :news, :feed do
+  #        content_type '.json'
+  #      end
+  #    end
+  #
+  # @example set Content-Type at instance level
+  #    class App < E
+  #      # ...
+  #      def news
+  #        content_type! '.json'
+  #        # ...
+  #      end
+  #    end
+  #
+  # @param [String] type
+  # @param [String] charset
+  def content_type! type = nil, charset = nil
+    __e__.explicit_charset = charset if charset
+    charset ||= (content_type = response['Content-Type']) &&
+        content_type.scan(%r[.*;\s?charset=(.*)]i).flatten.first
+    type && (Symbol === type) && (type = '.' << type.to_s)
+    content_type = type ?
+        (type =~ /\A\./ ? '' << mime_type(type) : type.split(';').first) : 'text/html'
+    content_type << '; charset=' << charset if charset
+    response['Content-Type'] = content_type
+  end
+
+  alias provide! content_type!
+  alias provides! content_type!
+
+  def content_type? action = action_with_format
+    self.class.content_type?(action)
+  end
+
+  # update Content-Type header by add/update charset.
+  #
+  # @note please make sure that returned body is of same charset,
+  #       cause Appetite will only set header and not change the charset of body itself!
+  #
+  # @note you do not need to set charset inside each action.
+  #       this can be done automatically by using `charset` at class level.
+  #
+  # @example set charset at class level for all actions
+  #    class App < E
+  #      # ...
+  #      charset 'UTF-8'
+  #    end
+  #
+  # @example set charset at class level for :feed and :recent actions
+  #    class App < E
+  #      # ...
+  #      setup :feed, :recent do
+  #        charset 'UTF-8'
+  #      end
+  #    end
+  #
+  # @example set charset at instance level
+  #    class App < E
+  #      # ...
+  #      def news
+  #        # ...
+  #        charset! 'UTF-8'
+  #        # body of same charset as `charset!`
+  #      end
+  #    end
+  #
+  # @note make sure you have defined Content-Type(at class or instance level)
+  #       header before using `charset`
+  #
+  # @param [String] charset
+  def charset! charset
+    content_type! response['Content-Type'], charset
+  end
+
+  def charset? action = action_with_format
+    self.class.charset?(action)
+  end
+
+  def cache_control? action = action_with_format
+    self.class.cache_control? action
+  end
+
+  def expires? action = action_with_format
+    self.class.expires? action
+  end
+
+  # simply pass control to another action.
+  #
+  # by default, it will pass control to an action on current app.
+  # however, if first argument is a app, control will be passed to given app.
+  #
+  # by default, it will pass with given path parameters, i.e. PATH_INFO
+  # if you pass some arguments beside action, they will be passed to destination action.
+  #
+  # @example pass control to #control_panel if user authorized
+  #    def index
+  #      pass :control_panel if user?
+  #    end
+  #
+  # @example passing with modified arguments
+  #    def index id, action
+  #      pass action, id
+  #    end
+  #
+  # @example passing with modified arguments and custom HTTP params
+  #    def index id, action
+  #      pass action, id, :foo => :bar
+  #    end
+  #
+  # @example passing control to inner app
+  #    def index id, action
+  #      pass Articles, :news, action, id
+  #    end
+  #
+  # @param [Class] *args
+  # @param [Proc] &proc
+  def pass *args
+    halt invoke *args
+  end
+
+  # same as `pass` except it returns the result instead of halting
+  #
+  # @param [Class] *args
+  # @param [Proc] &proc
+  def invoke *args, &proc
+
+    if args.size == 0
+      error 500, '`%s` expects an action(or an app and action) to be provided' % __method__
+    end
+
+    app = ::AppetiteUtils.is_app?(args.first) ? args.shift : self.class
+
+    if args.size == 0
+      error 500, 'Beside app, `%s` expects an action to be provided' % __method__
+    end
+
+    action = args.shift.to_sym
+    route = app[action] || error(404, '%s app does not respond to %s action' % [app, action])
+    rest_map = app.url_map[route]
+    env.update 'SCRIPT_NAME' => route
+
+    if args.size > 0
+      path, params = '/', {}
+      args.each { |a| a.is_a?(Hash) ? params.update(a) : path << a.to_s << '/' }
+      env.update 'PATH_INFO' => path
+      params.size > 0 &&
+          env.update('QUERY_STRING' => build_nested_query(params))
+    end
+    app.new(nil, rest_map).call env, &proc
+  end
+
+  # same as `invoke` except it returns only body
+  def fetch *args, &proc
+    invoke(*args, &proc).last
+  end
+
+  # same as `halt` except it uses as body the proc defined by `error` at class level
+  #
+  # @example
+  #    class App < E
+  #
+  #      # defining the proc to be executed on 404 errors
+  #      error 404 do |message|
+  #        render_view('layouts/404'){ message }
+  #      end
+  #
+  #      get :index do |id, status|
+  #        item = Model.fisrt id: id, status: status
+  #        unless item
+  #          # interrupt execution and send 404 error to browser.
+  #          error 404, 'Can not find item by given ID and Status'
+  #        end
+  #        # if no item found, code here will not be executed
+  #      end
+  #    end
+  def error status, body = nil
+    (handler = self.class.error?(status)) &&
+        (body = handler.last > 0 ? self.send(handler.first, body) : self.send(handler.first))
+    super
+  end
+
+  # Serving static files.
+  # Note that this blocks app while file readed/transmitted(on WEBrick and Thin, as minimum).
+  # To avoid app locking, setup your Nginx/Lighttpd server to set proper X-Sendfile header
+  # and use Rack::Sendfile middleware in your app.
+  #
+  # @param [String] path full path to file
+  # @param [Hash] opts
+  # @option opts [String] filename the name of file displayed in browser's save dialog
+  # @option opts [String] content_type custom content_type
+  # @option opts [String] last_modified
+  # @option opts [String] cache_control
+  # @option opts [Boolean] attachment if set to true, browser will prompt user to save file
+  def send_file path, opts = {}
+
+    file = ::Rack::File.new nil
+    file.path = path
+    (cache_control = opts[:cache_control]) && (file.cache_control = cache_control)
+    response = file.serving env
+
+    response[1]['Content-Disposition'] = opts[:attachment] ?
+        'attachment; filename="%s"' % (opts[:filename] || ::File.basename(path)) :
+        'inline'
+
+    (content_type = opts[:content_type]) &&
+        (response[1]['Content-Type'] = content_type)
+
+    (last_modified = opts[:last_modified]) &&
+        (response[1]['Last-Modified'] = last_modified)
+
+    halt response
+  end
+
+  # serve static files at dir path
+  def send_files dir
+    halt ::Rack::Directory.new(dir).call(env)
+  end
+
+  # same as `send_file` except it instruct browser to display save dialog
+  def attachment path, opts = {}
+    halt send_file path, opts.merge(:attachment => true)
   end
 
   def app_root
     self.class.app_root
   end
 
-  if ::MeisterConstants::RESPOND_TO__SOURCE_LOCATION # ruby1.9
-    def cache key = nil, &proc
-      key ||= proc.source_location
-      cache_pool[key] || __e__.sync { cache_pool[key] = proc.call }
-    end
-  else # ruby1.8
-    def cache key = nil, &proc
-      key ||= proc.to_s.split('@').last
-      cache_pool[key] || __e__.sync { cache_pool[key] = proc.call }
-    end
-  end
-
-  def cache_pool
-    self.class.cache_pool?
-  end
-
-  # a simple way to manage stored cache.
-  # @example
-  #    class App < E
-  #
-  #      before do
-  #        if 'some condition occurred'
-  #          # updating cache only for @banners and @db_items
-  #          update_cache! :banners, :db_items
-  #        end
-  #        if 'some another condition occurred'
-  #          # updating all cache
-  #          update_cache!
-  #        end
-  #      end
-  #    end
-  #
-  #    def index
-  #      @db_items = cache :db_items do
-  #        # fetching items
-  #      end
-  #      @banners = cache :banners do
-  #        # render banners partial
-  #      end
-  #      # ...
-  #    end
-  #
-  #    def products
-  #      cache do
-  #        # fetch and render products
-  #      end
-  #    end
-  #  end
-  #
-  def update_cache! *keys
-    __e__.sync do
-      keys.size == 0 ?
-          cache_pool.clear :
-          keys.each { |key| cache_pool.delete(key) }
-    end
-  end
-
   # The response object. See Rack::Response and Rack::ResponseHelpers for more info:
   # http://rack.rubyforge.org/doc/classes/Rack/Response.html
   # http://rack.rubyforge.org/doc/classes/Rack/Response/Helpers.html
-  class EResponse < Rack::Response # class kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
+  class EspressoFrameworkResponse < ::Rack::Response # class kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
     def body=(value)
       value = value.body while Rack::Response === value
       @body = String === value ? [value.to_str] : value
@@ -107,7 +377,7 @@ class E
   # handler is using.
   #
   # Scheduler has to respond to defer and schedule.
-  class EStream # class kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
+  class EspressoFrameworkStream # class kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
     def self.schedule(*)
       yield
     end
@@ -151,7 +421,7 @@ class E
     alias errback callback
   end
 
-  module EHelpers # methods kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
+  module EspressoFrameworkCoreHelpers # methods kindly borrowed from [Sinatra Framework](https://github.com/sinatra/sinatra)
 
     # Set or retrieve the response status code.
     def status(value=nil)
@@ -182,7 +452,7 @@ class E
     # after the block has been executed. This is only relevant for evented
     # servers like Thin or Rainbows.
     def stream(keep_open = false)
-      scheduler = env['async.callback'] ? EventMachine : EStream
+      scheduler = env['async.callback'] ? EventMachine : EspressoFrameworkStream
       current = params.dup
       block = proc do |out|
         begin
@@ -193,7 +463,7 @@ class E
         end
       end
 
-      body EStream.new(scheduler, keep_open, &block)
+      body EspressoFrameworkStream.new(scheduler, keep_open, &block)
     end
 
     # Specify response freshness policy for HTTP caches (Cache-Control header).
@@ -345,9 +615,9 @@ class E
     end
 
   end
-  include EHelpers
+  include EspressoFrameworkCoreHelpers
 
-  class EInstanceVariables
+  class EspressoFrameworkInstanceVariables
 
     include ::MonitorMixin
 
@@ -517,7 +787,7 @@ class E
     # @param [Symbol, String] action_or_path
     def template action_or_path, ext = nil
       route = @ctrl[action_or_path] || action_or_path.to_s
-      ((abs = @ctrl.absolute_view_path) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
+      ((abs = @ctrl.view_fullpath) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
           route << (ext || @ctrl.engine_ext(action_or_path))
     end
 
@@ -525,7 +795,7 @@ class E
       layout, layout_proc = @ctrl[action] ? @ctrl.layout(action) : action.to_s
       return unless layout
       layout = layout_proc ? nil :
-          ((abs = @ctrl.absolute_view_path) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
+          ((abs = @ctrl.view_fullpath) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
               @ctrl.layouts_path << layout <<
               (ext || @ctrl.engine_ext(action))
       [layout, layout_proc]
@@ -548,462 +818,5 @@ class E
     end
 
   end
-
-  module EHTTPMixin
-    def response
-      __e__.response ||= EResponse.new
-    end
-
-    def params
-      __e__.params ||= indifferent_params(orig_params)
-    end
-
-    def get_params
-      __e__.get_params ||= indifferent_params(self.GET)
-    end
-
-    def post_params
-      __e__.post_params ||= indifferent_params(self.POST)
-    end
-
-    def action__invoke &proc
-      if (restriction = self.class.restrictions?(action_with_format))
-        auth_class, auth_opts, auth_proc = restriction
-        (auth_request = auth_class.new(proc {}, auth_opts, &auth_proc).call(env)) && halt(auth_request)
-      end
-
-      (cache_control = cache_control?) && cache_control!(*cache_control)
-      (expires = expires?) && expires!(*expires)
-      (content_type = format? ? mime_type(format) : content_type?) && content_type!(content_type)
-      (charset = __e__.explicit_charset || charset?) && charset!(charset)
-
-      (self.class.hooks?(:a, action_with_format)||[]).each { |m| self.send m }
-
-      super
-
-      (self.class.hooks?(:z, action_with_format)||[]).each { |m| self.send m }
-    end
-
-    %w[ session flash cookies ].each do |m|
-      define_method m do
-        __e__.send m
-      end
-    end
-
-
-    def user
-      env['REMOTE_USER']
-    end
-
-    alias user? user
-
-
-    %w[ escape_html
-      unescape_html
-      escape_element
-      unescape_element
-      rfc1123_date
-      pretty  ].map { |m| m.to_sym }.each do |m|
-      define_method m do |*args|
-        ::CGI.send(m, *args)
-      end
-    end
-
-    # getting various setups accepted by browser.
-    # `accept?` is for content type, `accept_charset?` for charset etc.
-    # as per W3C specification.
-    #
-    # useful when your API need to know about browser's expectations.
-    #
-    # @example
-    #    accept? 'json'
-    #    accept? /xml/
-    #    accept_charset? 'UTF-8'
-    #    accept_charset? /iso/
-    #    accept_encoding? 'gzip'
-    #    accept_encoding? /zip/
-    #    accept_language? 'en-gb'
-    #    accept_language? /en\-(gb|us)/
-    #    accept_ranges? 'bytes'
-    #
-    ['', '_charset', '_encoding', '_language', '_ranges'].each do |field|
-      define_method 'accept' << field do
-        __e__.send(__method__) ||
-            __e__.send('%s=' % __method__, env['HTTP_ACCEPT' << field.upcase].to_s)
-      end
-
-      define_method 'accept%s?' % field do |value|
-        self.send('accept' << field) =~ value.is_a?(Regexp) ? value : /#{value}/
-      end
-    end
-
-    # set Content-Type header
-    #
-    # Content-Type will be guessed by passing given type to `mime_type`
-    #
-    # if second arg given, it will be added as charset
-    #
-    # you do not need to manually set Content-Type inside each action.
-    # this can be done automatically by using `content_type` at class level
-    #
-    # @example set Content-Type at class level for all actions
-    #    class App < E
-    #      # ...
-    #      content_type '.json'
-    #    end
-    #
-    # @example set Content-Type at class level for :news and :feed actions
-    #    class App < E
-    #      # ...
-    #      setup :news, :feed do
-    #        content_type '.json'
-    #      end
-    #    end
-    #
-    # @example set Content-Type at instance level
-    #    class App < E
-    #      # ...
-    #      def news
-    #        content_type! '.json'
-    #        # ...
-    #      end
-    #    end
-    #
-    # @param [String] type
-    # @param [String] charset
-    def content_type! type = nil, charset = nil
-      __e__.explicit_charset = charset if charset
-      charset ||= (content_type = response['Content-Type']) &&
-          content_type.scan(%r[.*;\s?charset=(.*)]i).flatten.first
-      type && (Symbol === type) && (type = '.' << type.to_s)
-      content_type = type ?
-          (type =~ /\A\./ ? '' << mime_type(type) : type.split(';').first) : 'text/html'
-      content_type << '; charset=' << charset if charset
-      response['Content-Type'] = content_type
-    end
-
-    alias provide! content_type!
-    alias provides! content_type!
-
-    def content_type? action = action_with_format
-      self.class.content_type?(action)
-    end
-
-    # update Content-Type header by add/update charset.
-    #
-    # @note please make sure that returned body is of same charset,
-    #       cause Meister will only set header and not change the charset of body itself!
-    #
-    # @note you do not need to set charset inside each action.
-    #       this can be done automatically by using `charset` at class level.
-    #
-    # @example set charset at class level for all actions
-    #    class App < E
-    #      # ...
-    #      charset 'UTF-8'
-    #    end
-    #
-    # @example set charset at class level for :feed and :recent actions
-    #    class App < E
-    #      # ...
-    #      setup :feed, :recent do
-    #        charset 'UTF-8'
-    #      end
-    #    end
-    #
-    # @example set charset at instance level
-    #    class App < E
-    #      # ...
-    #      def news
-    #        # ...
-    #        charset! 'UTF-8'
-    #        # body of same charset as `charset!`
-    #      end
-    #    end
-    #
-    # @note make sure you have defined Content-Type(at class or instance level)
-    #       header before using `charset`
-    #
-    # @param [String] charset
-    def charset! charset
-      content_type! response['Content-Type'], charset
-    end
-
-    def charset? action = action_with_format
-      self.class.charset?(action)
-    end
-
-    def cache_control? action = action_with_format
-      self.class.cache_control? action
-    end
-
-    def expires? action = action_with_format
-      self.class.expires? action
-    end
-
-    # simply pass control to another action.
-    #
-    # by default, it will pass control to an action on current app.
-    # however, if first argument is a app, control will be passed to given app.
-    #
-    # by default, it will pass with given path parameters, i.e. PATH_INFO
-    # if you pass some arguments beside action, they will be passed to destination action.
-    #
-    # @example pass control to #control_panel if user authorized
-    #    def index
-    #      pass :control_panel if user?
-    #    end
-    #
-    # @example passing with modified arguments
-    #    def index id, action
-    #      pass action, id
-    #    end
-    #
-    # @example passing with modified arguments and custom HTTP params
-    #    def index id, action
-    #      pass action, id, :foo => :bar
-    #    end
-    #
-    # @example passing control to inner app
-    #    def index id, action
-    #      pass Articles, :news, action, id
-    #    end
-    #
-    # @param [Class] *args
-    # @param [Proc] &proc
-    def pass *args
-      halt invoke *args
-    end
-
-    # same as `pass` except it returns the result instead of halting
-    #
-    # @param [Class] *args
-    # @param [Proc] &proc
-    def invoke *args, &proc
-
-      if args.size == 0
-        error 500, '`%s` expects an action(or an app and action) to be provided' % __method__
-      end
-
-      app = ::MeisterUtils.is_app?(args.first) ? args.shift : self.class
-
-      if args.size == 0
-        error 500, 'Beside app, `%s` expects an action to be provided' % __method__
-      end
-
-      action = args.shift.to_sym
-      route = app[action] || error(404, '%s app does not respond to %s action' % [app, action])
-      rest_map = app.url_map[route]
-      env.update 'SCRIPT_NAME' => route
-
-      if args.size > 0
-        path, params = '/', {}
-        args.each { |a| a.is_a?(Hash) ? params.update(a) : path << a.to_s << '/' }
-        env.update 'PATH_INFO' => path
-        params.size > 0 &&
-            env.update('QUERY_STRING' => build_nested_query(params))
-      end
-      app.new(nil, rest_map).call env, &proc
-    end
-
-    # same as `invoke` except it returns only body
-    def fetch *args, &proc
-      invoke(*args, &proc).last
-    end
-
-    # same as `halt` except it uses as body the proc defined by `error` at class level
-    #
-    # @example
-    #    class App < E
-    #
-    #      # defining the proc to be executed on 404 errors
-    #      error 404 do |message|
-    #        render_view('layouts/404'){ message }
-    #      end
-    #
-    #      get :index do |id, status|
-    #        item = Model.fisrt id: id, status: status
-    #        unless item
-    #          # interrupt execution and send 404 error to browser.
-    #          error 404, 'Can not find item by given ID and Status'
-    #        end
-    #        # if no item found, code here will not be executed
-    #      end
-    #    end
-    def error status, body = nil
-      (handler = self.class.error?(status)) &&
-          (body = handler.last > 0 ? self.send(handler.first, body) : self.send(handler.first))
-      super
-    end
-
-    # Serving static files.
-    # Note that this blocks app while file readed/transmitted(on WEBrick and Thin, as minimum).
-    # To avoid app locking, setup your Nginx/Lighttpd server to set proper X-Sendfile header
-    # and use Rack::Sendfile middleware in your app.
-    #
-    # @param [String] path full path to file
-    # @param [Hash] opts
-    # @option opts [String] filename the name of file displayed in browser's save dialog
-    # @option opts [String] content_type custom content_type
-    # @option opts [String] last_modified
-    # @option opts [String] cache_control
-    # @option opts [Boolean] attachment if set to true, browser will prompt user to save file
-    def send_file path, opts = {}
-
-      file = ::Rack::File.new nil
-      file.path = path
-      (cache_control = opts[:cache_control]) && (file.cache_control = cache_control)
-      response = file.serving env
-
-      response[1]['Content-Disposition'] = opts[:attachment] ?
-          'attachment; filename="%s"' % (opts[:filename] || ::File.basename(path)) :
-          'inline'
-
-      (content_type = opts[:content_type]) &&
-          (response[1]['Content-Type'] = content_type)
-
-      (last_modified = opts[:last_modified]) &&
-          (response[1]['Last-Modified'] = last_modified)
-
-      halt response
-    end
-
-    # serve static files at dir path
-    def send_files dir
-      halt ::Rack::Directory.new(dir).call(env)
-    end
-
-    # same as `send_file` except it instruct browser to display save dialog
-    def attachment path, opts = {}
-      halt send_file path, opts.merge(:attachment => true)
-    end
-  end
-  include EHTTPMixin
-
-  module EViewMixin
-
-    def engine action = nil
-      self.class.engine?(action || action_with_format)
-    end
-
-    def engine_ext action = nil
-      self.class.engine_ext?(action || action_with_format) ||
-          self.class.engine_default_ext?(engine(action).first)
-    end
-
-    def layout action = nil
-      self.class.layout?(action || action_with_format)
-    end
-
-    def view_path
-      self.class.view_path?
-    end
-
-    def absolute_view_path
-      self.class.absolute_view_path?
-    end
-
-    def layouts_path
-      self.class.layouts_path?
-    end
-
-    def render *args, &proc
-      action, scope, locals, compiler_key = __e__.render_params(*args)
-      engine_class, engine_opts = engine action
-      engine_args = proc ? [engine_opts] : [__e__.template(action), engine_opts]
-      output = __e__.engine(compiler_key, engine_class, *engine_args, &proc).render scope, locals
-
-      layout, layout_proc = __e__.layout_template(self[action] ? action : action())
-      return output unless layout || layout_proc
-
-      engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
-      __e__.engine(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals) { output }
-    end
-
-    def render_partial *args, &proc
-      action, scope, locals, compiler_key = __e__.render_params(*args)
-      engine_class, engine_opts = engine action
-      engine_args = proc ? [engine_opts] : [__e__.template(action), engine_opts]
-      __e__.engine(compiler_key, engine_class, *engine_args, &proc).render scope, locals
-    end
-
-    def render_layout *args, &proc
-      action, scope, locals, compiler_key = __e__.render_params(*args)
-      engine_class, engine_opts = engine action
-      layout, layout_proc = __e__.layout_template action
-      layout || layout_proc || raise('seems there are no layout defined for %s#%s action' % [self.class, action])
-      engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
-      __e__.engine(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals, &(proc || proc() { '' }))
-    end
-
-    def render_file file, scope = nil, locals = nil, &proc
-      file, scope, locals, compiler_key = __e__.render_params(file, scope, locals)
-      ::File.extname(file).size == 0 && file << engine_ext(action_with_format)
-      path = absolute_view_path ? '' << absolute_view_path : '' << app_root << view_path
-      engine_class, engine_opts = engine(action_with_format)
-      __e__.engine(compiler_key, engine_class, path << file, engine_opts).render(scope, locals, &proc)
-    end
-
-    ::Tilt.mappings.inject({}) do |map, s|
-      s.last.each { |e| map.update e.to_s.split('::').last.sub(/Template\Z/, '').downcase => e }
-      map
-    end.each_pair do |suffix, engine|
-
-      # this can be easily done via `define_method`,
-      # however, ruby1.8 does not support default params for procs
-      class_eval <<-RUBY
-        def render_#{suffix} *args, &proc
-          file, scope, locals = nil, self, {}
-          args.each{ |a| (a.is_a?(String) || a.is_a?(Symbol)) ? (file = a.to_s) : (a.is_a?(Hash) ? locals = a : scope = a) }
-          compiler_key = locals.delete('')
-          return __e__.engine(compiler_key, #{engine}, &proc).render(scope, locals) unless file
-
-          ::File.extname(file).size == 0 && file << '.#{suffix}'
-          path = absolute_view_path ? '' << absolute_view_path : '' << app_root << view_path
-          __e__.engine(compiler_key, #{engine}, path << file).render(scope, locals, &proc)
-        end
-      RUBY
-
-    end
-
-    def compiler_pool
-      self.class.compiler_pool?
-    end
-
-    # call `update_compiler!` without args to update all compiled templates.
-    # to update only specific templates pass as arguments the IDs you used to enable compiler.
-    #
-    # @example
-    #    class App < E
-    #
-    #      def index
-    #        @banners = render_view :banners, '' => :banners
-    #        @ads = render_view :ads, '' => :ads
-    #        render '' => true
-    #      end
-    #
-    #      before do
-    #        if 'some condition occurred'
-    #          # updating only @banners and @ads
-    #          update_compiler! :banners, :ads
-    #        end
-    #        if 'some another condition occurred'
-    #          # update all templates
-    #          update_compiler!
-    #        end
-    #      end
-    #    end
-    #
-    # @note using of non-unique keys will lead to templates clashing
-    #
-    def update_compiler! *keys
-      __e__.sync do
-        keys.size == 0 ?
-            compiler_pool.clear :
-            keys.each { |key| compiler_pool.delete_if { |k, v| k.first == key } }
-      end
-    end
-  end
-  include EViewMixin
 
 end

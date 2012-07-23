@@ -1,4 +1,4 @@
-module EHTTPTest__File
+module ECoreTest__File
 
   class App < E
 
@@ -17,7 +17,7 @@ module EHTTPTest__File
     Test :inline do
 
       response = get :inline
-      is(response.body) =~ /module EHTTPTest__File/
+      is(response.body) =~ /module ECoreTest__File/
 
     end
 

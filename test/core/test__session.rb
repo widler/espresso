@@ -1,4 +1,4 @@
-module EHTTPTest__Session
+module ECoreTest__Session
 
   class App < E
 

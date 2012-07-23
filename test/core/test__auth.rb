@@ -1,4 +1,4 @@
-module EHTTPTest__Auth
+module ECoreTest__Auth
 
   class App < E
 

@@ -1,4 +1,4 @@
-module EHTTPTest__Pass
+module ECoreTest__Pass
 
   module Cms
     class Page < E

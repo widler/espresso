@@ -1,4 +1,4 @@
-module EHTTPTest__CacheControl
+module ECoreTest__CacheControl
 
   GENERIC = [:public, :must_revalidate, {:max_age => 600}]
   PRIVATE = [:private, :proxy_revalidate, {:min_stale => 20}]

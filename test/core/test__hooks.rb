@@ -1,4 +1,4 @@
-module EHTTPTest__Hooks
+module ECoreTest__Hooks
 
   class App < E
 

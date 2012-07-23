@@ -708,7 +708,7 @@ app.run
 **Example:** - Keeping sessions in mongodb
 
 ```bash
-    $ gem install rack-session-mongo
+$ gem install rack-session-mongo
 ```
 
 ```ruby

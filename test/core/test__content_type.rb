@@ -1,4 +1,4 @@
-module EHTTPTest__ContentType
+module ECoreTest__ContentType
 
   class App < E
 

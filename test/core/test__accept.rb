@@ -1,4 +1,4 @@
-module EHTTPTest__Accept
+module ECoreTest__Accept
 
   class App < E
 

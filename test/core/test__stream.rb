@@ -1,4 +1,4 @@
-module EHTTPTest__Stream
+module ECoreTest__Stream
 
   class App < E
 
@@ -17,7 +17,7 @@ module EHTTPTest__Stream
   Spec.new App do
 
     get :stream, :a => '1', :b => '2'
-    check(last_response.headers['Content-Type']) == MeisterHelpers.mime_type('.txt')
+    check(last_response.headers['Content-Type']) == AppetiteHelpers.mime_type('.txt')
     check(last_response.headers['Content-Length']) == '10'
     check(last_response.body) == 'a:1/c:2/c:'
 

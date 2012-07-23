@@ -7,10 +7,10 @@ require 'erb'
 
 require 'tilt'
 
-$:.unshift File.expand_path('../../../meister/lib', __FILE__)
-require 'meister'
+$:.unshift File.expand_path('../../../appetite/lib', __FILE__)
+require 'appetite'
 
-class E < ::Meister
+class E < ::Appetite
 end
 
 class Module
@@ -25,5 +25,7 @@ end
 
 require 'e/class'
 require 'e/instance'
-require 'e/extensions/crud'
+require 'e/helpers/crud'
+require 'e/helpers/view'
+require 'e/helpers/cache'
 require 'e/app'

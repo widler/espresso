@@ -1,4 +1,4 @@
-module EHTTPTest__Files
+module ECoreTest__Files
 
   class App < E
 

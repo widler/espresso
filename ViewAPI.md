@@ -117,14 +117,14 @@ class News < E
 end
 ```
 
-If app deployed on a non-Unix-like system, you should use `absolute_view_path` instead.
+If app deployed on a non-Unix-like system, you should use `view_fullpath` instead.
 
 **Example:**
 
 ```ruby
 class News < E
 
-    absolute_view_path File.expand_path '../../../shared-templates', __FILE__
+    view_fullpath File.expand_path '../../../shared-templates', __FILE__
     # ...
 end
 ```

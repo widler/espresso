@@ -80,11 +80,11 @@ module EViewTest__Format
       end
       Should 'render xml template' do
         expect { get('index.xml').body } == 'format-less layout/.xml template'
-        is(last_response.header['Content-Type']) == MeisterHelpers.mime_type('.xml')
+        is(last_response.header['Content-Type']) == AppetiteHelpers.mime_type('.xml')
       end
       Should 'render json template' do
         expect { get('api.json').body } == '.json'
-        is(last_response.header['Content-Type']) == MeisterHelpers.mime_type('.json')
+        is(last_response.header['Content-Type']) == AppetiteHelpers.mime_type('.json')
       end
       Should 'raise error cause :api action has no format-less template' do
         expect { get(:api).body }.to_raise_error Errno::ENOENT

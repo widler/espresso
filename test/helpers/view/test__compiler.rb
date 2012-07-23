@@ -36,7 +36,7 @@ module EViewTest__Compiler
 
     def file content
       file = rand.to_s
-      path = App.absolute_view_path? + file +
+      path = App.view_fullpath? + file +
           (App.engine_ext? || App.engine_default_ext?(App.engine?.first))
       ::File.open(path, 'w') { |f| f << content }
       [file, path]

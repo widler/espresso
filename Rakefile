@@ -4,35 +4,36 @@ require 'rake'
 task :default => :test
 
 require './test/setup'
+::Dir['./test/**/test__*.rb'].each { |f| require f }
 
 namespace :test do
-  task :http do
-    ::Dir['./test/http/test__*.rb'].each { |f| require f }
+  task :core do
+    puts "\n**\nTesting Core ..."
     session = Specular.new
-    session.boot { include Motor::Mixin }
+    session.boot { include Sonar }
     session.before do |app|
-      if app && ::MeisterUtils.is_app?(app)
+      if app && ::AppetiteUtils.is_app?(app)
         app.use Rack::Lint
         app(app)
-        map app.route
+        map(app.base_url)
       end
     end
-    session.run /EHTTPTest/, :trace => true
+    session.run /ECoreTest/, :trace => true
     puts session.failures if session.failed?
     puts session.summary
     session.exit_code
   end
 
   task :view do
-    ::Dir['./test/view/test__*.rb'].each { |f| require f }
+    puts "\n**\nTesting View API ..."
     session = Specular.new
-    session.boot { include Motor::Mixin }
+    session.boot { include Sonar }
     session.before do |app|
-      if app && ::MeisterUtils.is_app?(app)
+      if app && ::AppetiteUtils.is_app?(app)
         app.use Rack::Lint
-        # using `absolute_view_path` to be sure tests will work on non-Unix-like too
-        app app.mount { absolute_view_path ::File.expand_path('../test/view/templates', __FILE__) }
-        map app.route
+        # using `view_fullpath` to be sure tests will work on non-Unix-like too
+        app app.mount { view_fullpath! ::File.expand_path('../test/helpers/view/templates', __FILE__) }
+        map(app.base_url)
         get
       end
     end
@@ -41,9 +42,27 @@ namespace :test do
     puts session.summary
     session.exit_code
   end
+
+  task :helpers do
+    puts "\n**\nTesting Helpers ..."
+    session = Specular.new
+    session.boot { include Sonar }
+    session.before do |app|
+      if app && ::AppetiteUtils.is_app?(app)
+        app.use Rack::Lint
+        app(app)
+        map(app.base_url)
+        get
+      end
+    end
+    session.run /EHelpersTest/, :trace => true
+    puts session.failures if session.failed?
+    puts session.summary
+    session.exit_code
+  end
 end
 
-task :test => ['test:http', 'test:view']
+task :test => ['test:core', 'test:view', 'test:helpers']
 
 task :overhead do
   require './test/overhead/run'
