@@ -5,13 +5,18 @@ module EViewTest__Engine
     layout :layout
     engine :Haml
 
-    format :xml
+    format :xml, :txt
     setup '.xml' do
       engine :ERB
     end
 
     setup 'blah.xml' do
       engine :String
+    end
+
+    setup 'blah.txt' do
+      layout! false
+      engine! :String
     end
 
     def index
@@ -36,8 +41,14 @@ module EViewTest__Engine
     get :blah
     expect(last_response.body) == "HAML Layout/\nblah.haml\n"
 
-    get 'blah.xml'
-    expect(last_response.body) == "Hello blah.xml.erb!"
+    It "should use engine set earlier by `setup '.xml'`, cause `setup 'blah.xml'` does not use bang method, and earlier setup not overridden" do
+      get 'blah.xml'
+      expect(last_response.body) == "Hello blah.xml.erb!"
+    end
+
+    It "should use String engine cause `setup 'blah.txt'` using bang methods and earlier setup are overridden" do
+      expect { get('blah.txt').body } == 'blah.txt.str - blah.txt'
+    end
 
   end
 end

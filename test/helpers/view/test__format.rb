@@ -141,7 +141,7 @@ module EViewTest__Format
       get :string
       is?(last_response.body) == 'format-less layout/blah!'
       get 'string.str'
-      is?(last_response.body) == '.str layout/blah!'
+      is?(last_response.body) == '.str layout/.str template - blah!'
     end
 
   end

@@ -70,6 +70,27 @@ class App < E
 end
 ```
 
+**Please Note** that when you firstly setup actions by regexp
+then try to setup a specific action, last setup will be ignored.
+
+To override setup set by regexp, use bang methods in specific setups.
+
+**Example:**
+
+```ruby
+class App < E
+
+    setup /red/ do
+      engine :ERB
+    end
+
+    setup :red_pants do
+      engine  :Erubis   # :red_pants will still use ERB engine
+      engine! :Erubis   # :red_pants will use Erubis engine
+    end
+end
+```
+
 
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
@@ -132,6 +153,57 @@ class App < E
     end
 
     # ...
+end
+```
+
+**Important Note!** When setting up actions by format wildcard,
+Espresso will preserve that setup for all actions matching given format.
+
+And when you want to setup a specific action after you did an wildcard setup,
+you'll note that specific setup is ignored.
+
+It may look confusing, though it is not,
+cause specific action you want to setup already has a setup.
+
+To override an existing setup, simply use bang methods.
+
+**Example:**
+
+```ruby
+class App < E
+
+    format :html
+
+    setup '.html' do
+      engine :ERB
+    end
+
+    setup 'blah.html' do
+      engine  :Erubis   # this wont work
+      engine! :Erubis   # this will work
+    end
+end
+```
+
+Same for cases when you firstly setup a specific action,
+then trying to setup actions by format wildcard.
+
+
+**Example:**
+
+```ruby
+class App < E
+
+    format :html
+
+    setup 'blah.html' do
+      engine :ERB
+    end
+
+    setup '.html' do
+      engine  :Erubis   # :blah action will still use ERB engine
+      engine! :Erubis   # :blah action will use Erubis engine
+    end
 end
 ```
 

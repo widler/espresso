@@ -341,6 +341,13 @@ class E
     [action, scope, locals, compiler_key]
   end
 
+  def __e__engine_instance compiler_key, engine, *args, &proc
+    return engine.new(*args, &proc) unless compiler_key
+    key = [compiler_key, engine, args, proc]
+    compiler_pool[key] ||
+        __e__.sync { compiler_pool[key] = engine.new(*args, &proc) }
+  end
+
   # building path to template.
   # if given argument is an existing action, the action route will be used.
   # otherwise given argument is used as path.
@@ -361,14 +368,4 @@ class E
     [layout, layout_proc]
   end
 
-  def __e__engine_instance compiler_key, engine, *args, &proc
-    if compiler_key
-      key = [compiler_key, engine, args, proc]
-      compiler_pool[key] ||
-          __e__.sync { compiler_pool[key] = engine.new(*args, &proc) }
-
-    else
-      engine.new *args, &proc
-    end
-  end
 end

@@ -31,8 +31,8 @@ namespace :test do
     session.before do |app|
       if app && ::AppetiteUtils.is_app?(app)
         app.use Rack::Lint
-        # using `view_fullpath` to be sure tests will work on non-Unix-like too
-        app app.mount { view_fullpath! ::File.expand_path('../test/helpers/view/templates', __FILE__) }
+        # using `view_fullpath` to be sure tests will work on non-Unix-like too.
+        app app.mount { view_fullpath ::File.expand_path('../test/helpers/view/templates', __FILE__) }
         map(app.base_url)
         get
       end
