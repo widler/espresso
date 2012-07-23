@@ -330,7 +330,7 @@ class EApp
     @controllers.each do |ctrl|
       ctrl, global_setup = ctrl
 
-      ctrl.app_root root
+      ctrl.app = self
       ctrl.setup!
       ctrl.global_setup! &global_setup
       ctrl.map!

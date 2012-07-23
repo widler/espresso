@@ -764,54 +764,6 @@ class E
       end.new @ctrl
     end
 
-    def render_params *args
-      action, scope, locals = @ctrl.action_with_format, @ctrl, {}
-      args.compact.each do |arg|
-        case
-          when arg.is_a?(Symbol), arg.is_a?(String)
-            action = arg
-          when arg.is_a?(Hash)
-            locals = arg
-          else
-            scope = arg
-        end
-      end
-      compiler_key = locals.delete('')
-      [action, scope, locals, compiler_key]
-    end
-
-    # building path to template.
-    # if given argument is an existing action, the action route will be used.
-    # otherwise given argument is used as path.
-    #
-    # @param [Symbol, String] action_or_path
-    def template action_or_path, ext = nil
-      route = @ctrl[action_or_path] || action_or_path.to_s
-      ((abs = @ctrl.view_fullpath) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
-          route << (ext || @ctrl.engine_ext(action_or_path))
-    end
-
-    def layout_template action, ext = nil
-      layout, layout_proc = @ctrl[action] ? @ctrl.layout(action) : action.to_s
-      return unless layout
-      layout = layout_proc ? nil :
-          ((abs = @ctrl.view_fullpath) ? '' << abs : '' << @ctrl.app_root << @ctrl.view_path) <<
-              @ctrl.layouts_path << layout <<
-              (ext || @ctrl.engine_ext(action))
-      [layout, layout_proc]
-    end
-
-    def engine compiler_key, engine, *args, &proc
-      if compiler_key
-        key = [compiler_key, engine, args, proc]
-        @ctrl.compiler_pool[key] ||
-            sync { @ctrl.compiler_pool[key] = engine.new(*args, &proc) }
-
-      else
-        engine.new *args, &proc
-      end
-    end
-
     def sync
       return yield if Thread.current == Thread.main
       synchronize { yield }

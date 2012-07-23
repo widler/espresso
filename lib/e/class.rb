@@ -313,7 +313,6 @@ class << E
   end
 
   alias mount! mount
-  alias app mount
   alias to_app mount
   alias to_app! mount
 
@@ -323,6 +322,16 @@ class << E
 
   def run *args
     mount.run *args
+  end
+
+  # @api semi-public
+  def app= app
+    return if locked?
+    @app = app
+  end
+
+  def app
+    @app
   end
 
   # @api semi-public
@@ -346,10 +355,8 @@ class << E
     map base_url, *new_canonicals
   end
 
-  def app_root root = nil
-    return @app__root if locked?
-    @app__root = root if root
-    @app__root
+  def app_root
+    app.root
   end
 
   def global_setup! &setup

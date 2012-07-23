@@ -201,17 +201,17 @@ end
 
 class E
 
-  def engine action = nil
-    self.class.engine?(action || action_with_format)
+  def engine action = action_with_format
+    self.class.engine? action
   end
 
-  def engine_ext action = nil
-    self.class.engine_ext?(action || action_with_format) ||
+  def engine_ext action = action_with_format
+    self.class.engine_ext?(action) ||
         self.class.engine_default_ext?(engine(action).first)
   end
 
-  def layout action = nil
-    self.class.layout?(action || action_with_format)
+  def layout action = action_with_format
+    self.class.layout? action
   end
 
   def view_path
@@ -227,40 +227,40 @@ class E
   end
 
   def render *args, &proc
-    action, scope, locals, compiler_key = __e__.render_params(*args)
+    action, scope, locals, compiler_key = __e__engine_params(*args)
     engine_class, engine_opts = engine action
-    engine_args = proc ? [engine_opts] : [__e__.template(action), engine_opts]
-    output = __e__.engine(compiler_key, engine_class, *engine_args, &proc).render scope, locals
+    engine_args = proc ? [engine_opts] : [__e__template(action), engine_opts]
+    output = __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render scope, locals
 
-    layout, layout_proc = __e__.layout_template(self[action] ? action : action())
+    layout, layout_proc = __e__layout_template(self[action] ? action : action())
     return output unless layout || layout_proc
 
     engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
-    __e__.engine(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals) { output }
+    __e__engine_instance(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals) { output }
   end
 
   def render_partial *args, &proc
-    action, scope, locals, compiler_key = __e__.render_params(*args)
+    action, scope, locals, compiler_key = __e__engine_params(*args)
     engine_class, engine_opts = engine action
-    engine_args = proc ? [engine_opts] : [__e__.template(action), engine_opts]
-    __e__.engine(compiler_key, engine_class, *engine_args, &proc).render scope, locals
+    engine_args = proc ? [engine_opts] : [__e__template(action), engine_opts]
+    __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render scope, locals
   end
 
   def render_layout *args, &proc
-    action, scope, locals, compiler_key = __e__.render_params(*args)
+    action, scope, locals, compiler_key = __e__engine_params(*args)
     engine_class, engine_opts = engine action
-    layout, layout_proc = __e__.layout_template action
+    layout, layout_proc = __e__layout_template action
     layout || layout_proc || raise('seems there are no layout defined for %s#%s action' % [self.class, action])
     engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
-    __e__.engine(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals, &(proc || proc() { '' }))
+    __e__engine_instance(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals, &(proc || proc() { '' }))
   end
 
   def render_file file, scope = nil, locals = nil, &proc
-    file, scope, locals, compiler_key = __e__.render_params(file, scope, locals)
+    file, scope, locals, compiler_key = __e__engine_params(file, scope, locals)
     ::File.extname(file).size == 0 && file << engine_ext(action_with_format)
     path = view_fullpath ? '' << view_fullpath : '' << app_root << view_path
     engine_class, engine_opts = engine(action_with_format)
-    __e__.engine(compiler_key, engine_class, path << file, engine_opts).render(scope, locals, &proc)
+    __e__engine_instance(compiler_key, engine_class, path << file, engine_opts).render(scope, locals, &proc)
   end
 
   ::Tilt.mappings.inject({}) do |map, s|
@@ -275,11 +275,11 @@ class E
         file, scope, locals = nil, self, {}
         args.each{ |a| (a.is_a?(String) || a.is_a?(Symbol)) ? (file = a.to_s) : (a.is_a?(Hash) ? locals = a : scope = a) }
         compiler_key = locals.delete('')
-        return __e__.engine(compiler_key, #{engine}, &proc).render(scope, locals) unless file
+        return __e__engine_instance(compiler_key, #{engine}, &proc).render(scope, locals) unless file
 
         ::File.extname(file).size == 0 && file << '.#{suffix}'
         path = view_fullpath ? '' << view_fullpath : '' << app_root << view_path
-        __e__.engine(compiler_key, #{engine}, path << file).render(scope, locals, &proc)
+        __e__engine_instance(compiler_key, #{engine}, path << file).render(scope, locals, &proc)
       end
     RUBY
 
@@ -320,6 +320,55 @@ class E
       keys.size == 0 ?
           compiler_pool.clear :
           keys.each { |key| compiler_pool.delete_if { |k, v| k.first == key } }
+    end
+  end
+
+  private
+
+  def __e__engine_params *args
+    action, scope, locals = action_with_format, self, {}
+    args.compact.each do |arg|
+      case
+        when arg.is_a?(Symbol), arg.is_a?(String)
+          action = arg
+        when arg.is_a?(Hash)
+          locals = arg
+        else
+          scope = arg
+      end
+    end
+    compiler_key = locals.delete('')
+    [action, scope, locals, compiler_key]
+  end
+
+  # building path to template.
+  # if given argument is an existing action, the action route will be used.
+  # otherwise given argument is used as path.
+  #
+  # @param [Symbol, String] action_or_path
+  def __e__template action_or_path, ext = nil
+    route = self[action_or_path] || action_or_path.to_s
+    (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) <<
+        route << (ext || engine_ext(action_or_path))
+  end
+
+  def __e__layout_template action, ext = nil
+    layout, layout_proc = self[action] ? layout(action) : action.to_s
+    return unless layout
+    layout = layout_proc ? nil :
+        (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) <<
+            layouts_path << layout << (ext || engine_ext(action))
+    [layout, layout_proc]
+  end
+
+  def __e__engine_instance compiler_key, engine, *args, &proc
+    if compiler_key
+      key = [compiler_key, engine, args, proc]
+      compiler_pool[key] ||
+          __e__.sync { compiler_pool[key] = engine.new(*args, &proc) }
+
+    else
+      engine.new *args, &proc
     end
   end
 end
