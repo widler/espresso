@@ -3,6 +3,7 @@ module EViewTest__Relpath
     map '/'
 
     view_path :templates
+    view_fullpath false
     layout :layout
 
     setup :get_render_layout_action do
@@ -45,7 +46,8 @@ module EViewTest__Relpath
 
   end
 
-  Spec.new App do
+  Spec.new self do
+    app EApp.new{ root File.expand_path '..', __FILE__ }.mount(App)
 
     get
     expect(last_response.body) == "Hello World!"

@@ -334,6 +334,10 @@ class << E
     @app
   end
 
+  def app_root
+    app.root
+  end
+
   # @api semi-public
   #
   # remap served root(s) by prepend given path to controller's root and canonical paths
@@ -353,10 +357,6 @@ class << E
       end
     end
     map base_url, *new_canonicals
-  end
-
-  def app_root
-    app.root
   end
 
   def global_setup! &setup

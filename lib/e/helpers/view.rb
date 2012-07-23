@@ -133,13 +133,13 @@ class << E
   # set custom path for templates.
   # default value: app_root/view/
   def view_path path
-    @view__path || view_path!(path)
+    view_path!(path, :keep_existing)
   end
 
-  def view_path! path
-    return if locked?
+  def view_path! path, keep_existing = false
+    return if locked? || (@view__path == false && keep_existing)
     path = normalize_path(path.to_s << '/').sub(/\/+\Z/, '/')
-    path =~ /\A\// ? view_fullpath!(path) : @view__path = path.freeze
+    path =~ /\A\// ? view_fullpath!(path, keep_existing) : @view__path = path.freeze
   end
 
   def view_path?
@@ -147,12 +147,12 @@ class << E
   end
 
   def view_fullpath path
-    view_fullpath!(path)
+    view_fullpath!(path, :keep_existing)
   end
 
-  def view_fullpath! path
-    return if locked?
-    @view__fullpath = normalize_path(path.to_s << '/').sub(/\/+\Z/, '/').freeze
+  def view_fullpath! path, keep_existing = false
+    return if locked? || (@view__fullpath == false && keep_existing)
+    @view__fullpath = path ? normalize_path(path.to_s << '/').sub(/\/+\Z/, '/').freeze : path
   end
 
   def view_fullpath?
@@ -163,11 +163,11 @@ class << E
   # default value: view path
   # @note should be relative to view path
   def layouts_path path
-    @view__layouts_path || layouts_path!(path)
+    layouts_path!(path, :keep_existing)
   end
 
-  def layouts_path! path
-    return if locked?
+  def layouts_path! path, keep_existing = false
+    return if locked? || (@view__layouts_path == false && keep_existing)
     @view__layouts_path = normalize_path(path.to_s << '/').freeze
   end
 
