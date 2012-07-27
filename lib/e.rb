@@ -8,7 +8,7 @@ require 'tilt'
 require 'appetite'
 
 class E < Appetite
-  
+
 end
 
 class Module
