@@ -10,7 +10,7 @@ require 'tilt'
 $:.unshift File.expand_path('../../../appetite/lib', __FILE__)
 require 'appetite'
 
-class E < ::Appetite
+class E < Appetite
 end
 
 class Module
