@@ -57,17 +57,6 @@ class E
 
   alias user? user
 
-  %w[ escape_html
-        unescape_html
-        escape_element
-        unescape_element
-        rfc1123_date
-        pretty  ].map { |m| m.to_sym }.each do |m|
-    define_method m do |*args|
-      ::CGI.send(m, *args)
-    end
-  end
-
   # getting various setups accepted by browser.
   # `accept?` is for content type, `accept_charset?` for charset etc.
   # as per W3C specification.

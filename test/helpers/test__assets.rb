@@ -21,15 +21,13 @@ module EHelpersTest__Assets
     map App.base_url
 
     get :image, :image => 'image.jpg'
-    expect(last_response.body) == '<img alt="image" src="/assets/images/image.jpg" />'
+    is(last_response.body) == '<img src="/assets/images/image.jpg" alt="image" />'
 
     get :image, :src => '/image.jpg'
-    expect(last_response.body) == '<img alt="image" src="/image.jpg" />'
-
+    is(last_response.body) == '<img src="/image.jpg" alt="image" />'
 
     get :image, :image => 'image.png', :alt => 'ALTO'
-    expect(last_response.body) == '<img alt="ALTO" src="/assets/images/image.png" />'
-
+    is(last_response.body) == '<img src="/assets/images/image.png" alt="ALTO" />'
 
   end
 end

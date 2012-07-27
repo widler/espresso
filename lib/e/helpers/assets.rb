@@ -47,13 +47,14 @@ class E
     type ? url << '/' << self.class.app.assets_map[type] : url
   end
 
-  def image_tag *args
-    src, opts = nil, {}
-    args.each { |a| a.is_a?(Hash) ? opts.update(a) : src = a }
-    opts[:src] ||= (src ? ('' << assets_url(:image) << src) : raise('please provide image src as string or :src option'))
-    opts[:alt] ||= ::File.basename(opts[:src], ::File.extname(opts[:src]))
-    opts = opts.keys.sort.inject([]) { |f, k| f << '%s="%s"' % [k, escape_html(opts[k])] }.join(' ')
-    '<img %s />' % opts
+  def image_tag src = nil, opts = {}
+    src.is_a?(Hash) && (opts = src) && (src = nil)
+    opted_src = opts.delete(:src)
+    src ||=  opted_src || raise('Please provide image URL as first argument or :src option')
+    opts[:alt] ||= ::File.basename(src, ::File.extname(src))
+    '<img src="%s" %s />' % [
+        opted_src ? opted_src : '' << assets_url(:image) << src,
+        opts.keys.inject([]) { |f, k| f << '%s="%s"' % [k, escape_html(opts[k])] }.join(' ')]
   end
 
 end
