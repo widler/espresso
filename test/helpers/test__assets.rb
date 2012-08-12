@@ -2,12 +2,25 @@ module EHelpersTest__Assets
 
   class App < E
 
+    before do
+      @opts = params.inject({}) { |o, p| o.update p.first.to_sym => p.last }
+    end
+
     def image
-      opts = params.inject({}){|o, p| o.update p.first.to_sym => p.last }
-      if (image = opts.delete(:image))
-        image_tag image, opts
+      if (url = @opts.delete(:url))
+        image_tag url, @opts
       else
-        image_tag opts
+        image_tag @opts
+      end
+    end
+
+    def javascript
+      if (url = @opts.delete(:url))
+        script_tag url, @opts
+      else
+        script_tag @opts do
+          params.inspect
+        end
       end
     end
 
@@ -20,14 +33,27 @@ module EHelpersTest__Assets
     end.mount(App)
     map App.base_url
 
-    get :image, :image => 'image.jpg'
-    is(last_response.body) == '<img src="/assets/images/image.jpg" alt="image" />'
+    Testing :images do
+      get :image, :url => 'image.jpg'
+      is(last_response.body) == '<img src="/assets/images/image.jpg" alt="image" />'
 
-    get :image, :src => '/image.jpg'
-    is(last_response.body) == '<img src="/image.jpg" alt="image" />'
+      get :image, :src => '/image.jpg'
+      is(last_response.body) == '<img src="/image.jpg" alt="image" />'
 
-    get :image, :image => 'image.png', :alt => 'ALTO'
-    is(last_response.body) == '<img src="/assets/images/image.png" alt="ALTO" />'
+      get :image, :url => 'image.png', :alt => 'ALTO'
+      is(last_response.body) == '<img src="/assets/images/image.png" alt="ALTO" />'
+    end
 
+    Testing :javascript do
+      get :javascript, :url => 'test.js'
+      check(last_response.body) == '<script src="/assets/scripts/test.js" type="text/javascript"></script>'
+
+      get :javascript, :some => 'param'
+      snips = last_response.body.split("\n").map { |s| s.strip }
+      check(snips[0]) == '<script some="param" type="text/javascript">'
+      check(snips[1]) == '{"some"=>"param"}'
+      check(snips[2]) == '</script>'
+
+    end
   end
 end

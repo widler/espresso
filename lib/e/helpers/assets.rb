@@ -25,12 +25,12 @@ class EApp
     def assets_map map = nil
       @assets_map = map if map.is_a?(Hash)
       @assets_map ||= indifferent_params({
-                                            :image => 'images/',
-                                            :css => 'styles/',
-                                            :js => 'scripts/',
-                                            :video => 'videos/',
-                                            :audio => 'audios/',
-                                        }).freeze
+                                             :image => 'images/',
+                                             :style => 'styles/',
+                                             :script => 'scripts/',
+                                             :video => 'videos/',
+                                             :audio => 'audios/',
+                                         }).freeze
     end
 
   end
@@ -50,11 +50,32 @@ class E
   def image_tag src = nil, opts = {}
     src.is_a?(Hash) && (opts = src) && (src = nil)
     opted_src = opts.delete(:src)
-    src ||=  opted_src || raise('Please provide image URL as first argument or :src option')
+    src ||= opted_src || raise('Please provide image URL as first argument or :src option')
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
     '<img src="%s" %s />' % [
         opted_src ? opted_src : '' << assets_url(:image) << src,
-        opts.keys.inject([]) { |f, k| f << '%s="%s"' % [k, escape_html(opts[k])] }.join(' ')]
+        __e__.assets__opts_to_s(opts)]
+  end
+
+  alias img_tag image_tag
+
+  def script_tag src = nil, opts = {}, &proc
+    src.is_a?(Hash) && (opts = src) && (src = nil)
+    opts[:type] ||= 'text/javascript'
+    if proc
+      html = <<HTML
+<script %s>
+  %s
+</script>
+HTML
+      html % [__e__.assets__opts_to_s(opts), proc.call]
+    else
+      opted_src = opts.delete(:src)
+      src ||= opted_src || raise('Please provide script URL as first argument or :src option')
+      '<script src="%s" %s></script>' % [
+          opted_src ? opted_src : '' << assets_url(:script) << src,
+          __e__.assets__opts_to_s(opts)]
+    end
   end
 
 end

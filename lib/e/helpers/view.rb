@@ -270,16 +270,39 @@ class E
 
     # this can be easily done via `define_method`,
     # however, ruby1.8 does not support default params for procs
+    # TODO: use `define_method` when 1.8 support dropped.
     class_eval <<-RUBY
       def render_#{suffix} *args, &proc
         file, scope, locals = nil, self, {}
         args.each{ |a| (a.is_a?(String) || a.is_a?(Symbol)) ? (file = a.to_s) : (a.is_a?(Hash) ? locals = a : scope = a) }
         compiler_key = locals.delete('')
-        return __e__engine_instance(compiler_key, #{engine}, &proc).render(scope, locals) unless file
-
-        ::File.extname(file).size == 0 && file << '.#{suffix}'
-        path = view_fullpath ? '' << view_fullpath : '' << app_root << view_path
-        __e__engine_instance(compiler_key, #{engine}, path << file).render(scope, locals, &proc)
+        
+        if file
+          # using explicit extension only if given file has no extension
+          ::File.extname(file).size == 0 && file << '.#{suffix}'
+          file = (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) << file
+          
+          # both file and proc given, using file as layout and block as template
+          return __e__engine_instance(compiler_key, #{engine}, file).render(scope, locals, &proc) if proc
+          
+          # only file given, using it as template
+          return __e__engine_instance(compiler_key, #{engine}, file).render(scope, locals)
+        end
+        
+        # block given, using it as template
+        return __e__engine_instance(compiler_key, #{engine}, &proc).render(scope, locals) if proc
+        
+        # no file nor proc given, rendering current action
+        #
+        # please note that explicit extension will be used even if action coming with format.
+        # class App < E
+        #   format :xml
+        #  
+        #   def some_action
+        #     render_erb # will render some_action.xml.erb
+        #   end
+        # end
+        __e__engine_instance(compiler_key, #{engine}, __e__template(action_with_format, '.#{suffix}')).render(scope, locals)
       end
     RUBY
 

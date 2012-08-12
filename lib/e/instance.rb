@@ -330,6 +330,22 @@ class E
     self.class.app.root
   end
 
+  def escape_html *args
+    ::CGI.escapeHTML *args
+  end
+
+  def unescape_html *args
+    ::CGI.unescapeHTML *args
+  end
+
+  def escape_element *args
+    ::CGI.escapeElement *args
+  end
+
+  def unescape_element *args
+    ::CGI.unescapeElement *args
+  end
+
   # The response object. See Rack::Response and Rack::ResponseHelpers for more info:
   # http://rack.rubyforge.org/doc/classes/Rack/Response.html
   # http://rack.rubyforge.org/doc/classes/Rack/Response/Helpers.html
@@ -609,6 +625,7 @@ class E
   class EspressoFrameworkInstanceVariables
 
     include ::MonitorMixin
+    include ::Rack::Utils
 
     attr_accessor :response,
                   :params, :get_params, :post_params,
@@ -751,6 +768,12 @@ class E
           @readonly
         end
       end.new @ctrl
+    end
+
+    def assets__opts_to_s opts
+      (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
+        f << '%s="%s"' % [k, @ctrl.escape_html(opts[k])]
+      end.join(' ')
     end
 
     def sync

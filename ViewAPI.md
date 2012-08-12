@@ -470,7 +470,9 @@ For example, to render a Haml template, use `render_haml`.
 It accepts from 0 to 3 arguments - the file, the scope and the locals.<br/>
 The scope is defaulted to current one and locals to an empty Hash.
 
-If NO file given, an block should be provided, that will be used as inline template.
+If no file and no block given, current action will be rendered.<br/>
+If a file and a block given, the file should be a layout, i.e. should contain `yield` statement.<br/>
+If block given and the file is not, the string returned by block will be used as template, a.k.a inline rendering.
 
 If given file has no extension, it will use the method suffix.<br/>
 For example, `render_haml` will add ".haml" extension to files,<br/>

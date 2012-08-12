@@ -328,7 +328,7 @@ class EApp
 
   private
   def builder
-    builder = ::Rack::Builder.new
+    app, builder = self, ::Rack::Builder.new
     use.each { |w| builder.use w[:ware], *w[:args], &w[:proc] }
     @controllers.each do |ctrl|
       ctrl, global_setup = ctrl
@@ -343,6 +343,9 @@ class EApp
           ctrl.use?.each { |w| use w[:ware], *w[:args], &w[:proc] }
           run lambda { |env| ctrl.new(nil, rest_map).call env }
         end
+      end
+      builder.map assets_url do
+        run lambda { |e| ::Rack::Directory.new(app.assets_fullpath || app.assets_path).call(e) }
       end
       ctrl.freeze!
       ctrl.lock! if locked?

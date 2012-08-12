@@ -1,9 +1,16 @@
 module EViewTest__render_erb
   class App < E
+    map '/'
+    
+    format :xml
 
     def index greeting
       @greeting = greeting
       render_erb __method__.to_s
+    end
+    
+    def blah
+      render_erb
     end
 
     def get_layout layout
@@ -33,6 +40,16 @@ module EViewTest__render_erb
 
     r = get :Blah!
     is?(r.body) == 'Blah!'
+    
+    Should :render_current_action do
+      get :blah
+      expect(last_response.body) == "blah.erb - blah"
+      
+      Should 'use extension even when action used with format' do
+        get "blah.xml"
+        expect(last_response.body) == "blah.xml.erb"
+      end
+    end
 
     Should 'render as layout' do
       r = get :layout, :layout
