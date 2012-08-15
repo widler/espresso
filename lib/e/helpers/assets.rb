@@ -56,7 +56,7 @@ class E
     opted_src = opts.delete(:src)
     src ||= opted_src || raise('Please provide image URL as first argument or :src option')
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
-    '<img src="%s" %s />' % [
+    "<img src=\"%s\" %s />\n" % [
         opted_src ? opted_src : '' << assets_url(:image) << src,
         __e__.assets__opts_to_s(opts)
       ]
@@ -68,11 +68,11 @@ class E
     src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     opts[:type] ||= 'text/javascript'
     if proc
-      "<script %s>\n%s\n</script>" % [__e__.assets__opts_to_s(opts), proc.call]
+      "<script %s>\n%s\n</script>\n" % [__e__.assets__opts_to_s(opts), proc.call]
     else
       opted_src = opts.delete(:src)
       src ||= opted_src || raise('Please provide script URL as first argument or via :src option')
-      '<script src="%s" %s></script>' % [
+      "<script src=\"%s\" %s></script>\n" % [
           opted_src ? opted_src : '' << assets_url(:script) << src,
           __e__.assets__opts_to_s(opts)
         ]
@@ -83,12 +83,12 @@ class E
     src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     if proc
       opts[:type] ||= 'text/css'
-      "<style %s>\n%s\n</style>" % [__e__.assets__opts_to_s(opts), proc.call]
+      "<style %s>\n%s\n</style>\n" % [__e__.assets__opts_to_s(opts), proc.call]
     else
       opts[:rel] = 'stylesheet'
       opted_src = opts.delete(:href) || opts.delete(:src)
       src ||= opted_src || raise('Please URL as first argument or :href option')
-      '<link href="%s" %s />' % [
+      "<link href=\"%s\" %s />\n" % [
           opted_src ? opted_src : '' << assets_url(:style) << src,
           __e__.assets__opts_to_s(opts)
         ]

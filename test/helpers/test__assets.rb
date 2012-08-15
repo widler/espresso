@@ -53,19 +53,19 @@ module EHelpersTest__Assets
     Testing :image_tag do
 
       get :image_with_url, 'image.jpg'
-      is(last_response.body) == '<img src="/images/image.jpg" alt="image" />'
+      is(last_response.body) == '<img src="/images/image.jpg" alt="image" />' << "\n"
 
       get :image_with_src, 'image.jpg'
-      is(last_response.body) == '<img src="image.jpg" alt="image" />'
+      is(last_response.body) == '<img src="image.jpg" alt="image" />' << "\n"
     end
 
     Testing :script_tag do
 
       get :script_with_url, 'url.js'
-      check(last_response.body) == '<script src="/url.js" type="text/javascript"></script>'
+      check(last_response.body) == '<script src="/url.js" type="text/javascript"></script>' << "\n"
 
       get :script_with_src, 'src.js'
-      check(last_response.body) == '<script src="src.js" type="text/javascript"></script>'
+      check(last_response.body) == '<script src="src.js" type="text/javascript"></script>' << "\n"
 
       get :script_with_block, :some => 'param'
       lines = last_response.body.split("\n").map { |s| s.strip }
@@ -78,10 +78,10 @@ module EHelpersTest__Assets
     Testing :style_tag do
 
       get :style_with_url, 'url.css'
-      check(last_response.body) == '<link href="/url.css" rel="stylesheet" />'
+      check(last_response.body) == '<link href="/url.css" rel="stylesheet" />' << "\n"
 
       get :style_with_src, 'src.css'
-      check(last_response.body) == '<link href="src.css" rel="stylesheet" />'
+      check(last_response.body) == '<link href="src.css" rel="stylesheet" />' << "\n"
 
       get :style_with_block, :some => 'param'
       lines = last_response.body.split("\n").map { |s| s.strip }
