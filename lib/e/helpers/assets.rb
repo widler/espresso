@@ -52,7 +52,7 @@ class E
   end
 
   def image_tag src = nil, opts = {}
-    src.is_a?(Hash) && (opts = src) && (src = nil)
+    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     opted_src = opts.delete(:src)
     src ||= opted_src || raise('Please provide image URL as first argument or :src option')
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
@@ -65,21 +65,33 @@ class E
   alias img_tag image_tag
 
   def script_tag src = nil, opts = {}, &proc
-    src.is_a?(Hash) && (opts = src) && (src = nil)
+    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     opts[:type] ||= 'text/javascript'
     if proc
-      html = <<HTML
-<script %s>
-  %s
-</script>
-HTML
-      html % [__e__.assets__opts_to_s(opts), proc.call]
+      "<script %s>\n%s\n</script>" % [__e__.assets__opts_to_s(opts), proc.call]
     else
       opted_src = opts.delete(:src)
-      src ||= opted_src || raise('Please provide script URL as first argument or :src option')
+      src ||= opted_src || raise('Please provide script URL as first argument or via :src option')
       '<script src="%s" %s></script>' % [
           opted_src ? opted_src : '' << assets_url(:script) << src,
-          __e__.assets__opts_to_s(opts)]
+          __e__.assets__opts_to_s(opts)
+        ]
+    end
+  end
+
+  def style_tag src = nil, opts = {}, &proc
+    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
+    if proc
+      opts[:type] ||= 'text/css'
+      "<style %s>\n%s\n</style>" % [__e__.assets__opts_to_s(opts), proc.call]
+    else
+      opts[:rel] = 'stylesheet'
+      opted_src = opts.delete(:href) || opts.delete(:src)
+      src ||= opted_src || raise('Please URL as first argument or :href option')
+      '<link href="%s" %s />' % [
+          opted_src ? opted_src : '' << assets_url(:style) << src,
+          __e__.assets__opts_to_s(opts)
+        ]
     end
   end
 
