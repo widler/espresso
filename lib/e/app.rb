@@ -285,7 +285,7 @@ class EApp
         route, request_methods = data
         next if route.size == 0
         out << "%s\n" % route
-        next unless opts[:verbose]
+        next unless opts[:verbose] || opts[:v]
         request_methods.each_pair do |request_method, route_setup|
           out << "  %s%s" % [request_method, ' ' * (10 - request_method.size)]
           out << "%s#%s\n" % [route_setup[0], route_setup[3]]
@@ -344,8 +344,10 @@ class EApp
           run lambda { |env| ctrl.new(nil, rest_map).call env }
         end
       end
-      builder.map assets_url do
-        run lambda { |e| ::Rack::Directory.new(app.assets_fullpath || app.assets_path).call(e) }
+      if assets_url = assets_url()
+        builder.map assets_url do
+          run lambda { |e| ::Rack::Directory.new(app.assets_fullpath || app.assets_path).call(e) }
+        end
       end
       ctrl.freeze!
       ctrl.lock! if locked?

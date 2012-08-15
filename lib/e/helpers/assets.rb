@@ -17,20 +17,24 @@ class EApp
       @assets_fullpath
     end
 
+    # if your app should serve assets, 
+    # use `app#assets_url` to set the URL that will serve assets.
+    # @note 
+    #   make sure given URL does not interfere with your actions
     def assets_url url = nil
       @assets_url = rootify_url(url).freeze if url
-      @assets_url ||= '/assets'.freeze
+      @assets_url
     end
 
     def assets_map map = nil
       @assets_map = map if map.is_a?(Hash)
       @assets_map ||= indifferent_params({
-                                             :image => 'images/',
-                                             :style => 'styles/',
-                                             :script => 'scripts/',
-                                             :video => 'videos/',
-                                             :audio => 'audios/',
-                                         }).freeze
+         :script => '/',
+         :style => '/',
+         :image => '/images/',
+         :video => '/videos/',
+         :audio => '/audios/',
+       }).freeze
     end
 
   end
@@ -43,8 +47,8 @@ class E
   end
 
   def assets_url type = nil
-    url = self.class.app.assets_url.dup
-    type ? url << '/' << self.class.app.assets_map[type] : url
+    url = self.class.app.assets_url ? self.class.app.assets_url.dup : ''
+    type ? url << self.class.app.assets_map[type] : url
   end
 
   def image_tag src = nil, opts = {}
@@ -54,7 +58,8 @@ class E
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
     '<img src="%s" %s />' % [
         opted_src ? opted_src : '' << assets_url(:image) << src,
-        __e__.assets__opts_to_s(opts)]
+        __e__.assets__opts_to_s(opts)
+      ]
   end
 
   alias img_tag image_tag

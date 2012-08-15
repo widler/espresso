@@ -72,17 +72,16 @@ module EHelpersTest__CRUD
     end
 
     Testing :public_CRUD do
-
       map App.base_url
 
       Test 'create and update' do
         Should 'create new records' do
-          0.upto(10).each do
+          # 0.upto(10).each do
             name = rand.to_s
             rsp = post :name => name
             id = rsp.body
             is(id.to_i) > 0
-          end
+          # end
 
           And 'update last record by PUT', &update(:put)
           And 'update last record by PATCH', &update(:patch)

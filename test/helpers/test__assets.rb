@@ -35,18 +35,18 @@ module EHelpersTest__Assets
 
     Testing :images do
       get :image, :url => 'image.jpg'
-      is(last_response.body) == '<img src="/assets/images/image.jpg" alt="image" />'
+      is(last_response.body) == '<img src="/images/image.jpg" alt="image" />'
 
       get :image, :src => '/image.jpg'
       is(last_response.body) == '<img src="/image.jpg" alt="image" />'
 
       get :image, :url => 'image.png', :alt => 'ALTO'
-      is(last_response.body) == '<img src="/assets/images/image.png" alt="ALTO" />'
+      is(last_response.body) == '<img src="/images/image.png" alt="ALTO" />'
     end
 
     Testing :javascript do
       get :javascript, :url => 'test.js'
-      check(last_response.body) == '<script src="/assets/scripts/test.js" type="text/javascript"></script>'
+      check(last_response.body) == '<script src="/test.js" type="text/javascript"></script>'
 
       get :javascript, :some => 'param'
       snips = last_response.body.split("\n").map { |s| s.strip }
