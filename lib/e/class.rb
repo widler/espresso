@@ -384,7 +384,7 @@ class << E
   # so compiling procs into methods at load time.
   def proc_to_method *chunks, &proc
     chunks += [self.to_s, proc.to_s]
-    name = ('__espresso_framework__%s__' %
+    name = ('__appetite__e__%s__' %
         chunks.map { |s| s.to_s }.join('_').gsub(/[^\w|\d]/, '_')).to_sym
     define_method name, &proc
     name

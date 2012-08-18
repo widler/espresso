@@ -20,6 +20,8 @@ require 'e'
 
 class App < E
 
+  map '/'
+
   def index
     # ...
   end
