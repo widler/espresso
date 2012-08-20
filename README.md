@@ -238,8 +238,8 @@ def book id
 end
 ```
 
-That's a regular Ruby method a regular Espresso action.<br/>
-That's also a Espresso route. Yes, the app will respond to "/book/100" or "/boot/anything"<br/>
+That's a regular **Ruby method** and a regular **Espresso action**.<br/>
+That's also an Espresso route. Yes, the app will respond to "/book/100"<br/>
 And of course action params are used naturally, through method arguments(`id` rather than `params[:id]`).
 
 And all this offered by Ruby for free! Why to reinvent the wheel?
@@ -303,13 +303,13 @@ Portability and DRY done right and easy.
 
 With Espresso, any controller can be mounted under any app.
 
-Even more, any set of controllers - slice - can be mounted under any app.
+Even more, any set of controllers - a.k.a. **slices** - can be mounted under any app.
 
 To create a slice simply put your controllers under some module.
 
 Then you can mount that module under any Espresso app.
 
-Even more, when mounting you can easily setup all controllers(or some) inside slice.
+Even more, when mounting you can easily setup all controllers(or some) at once.
 
 And of course when mounting, you can give a mount point.
 
