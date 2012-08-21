@@ -224,7 +224,7 @@ class App < E
 end
 ```
 
-**Important:** Template name should exactly match the name of current action, including REST verb, if any.
+*=== Important ===* Template name should exactly match the name of current action, including REST verb, if any.
 
 ```ruby
 def get_latest
@@ -301,10 +301,15 @@ Meant engine defined for current or given action,
 or engine defined for all actions,
 or default engine - ERB.
 
+
+**Inline rendering**
+
 If block given, the template will not be searched/rendered.<br/>
-Instead, it will render the string returned by the block, a.k.a. *inline rendering*.<br/>
+Instead, it will render the string returned by the block.<br/>
 This way you'll can render data from DB directly, without saving it to file system.
 
+
+*=== Important ===* If custom controller given, rendering methods will use the path, engine and layout set by given controller.
 
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 

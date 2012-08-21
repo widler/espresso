@@ -232,8 +232,14 @@ class EApp
   def mount namespace, *roots, &setup
     umount namespace
     extract_controllers(namespace).each do |ctrl|
+      # setup controllers at mount time
       (root = roots.shift) && ctrl.remap!(root, *roots)
-      @controllers << [ctrl, setup]
+      ctrl.app = self
+      ctrl.setup!
+      ctrl.global_setup!(&setup) if setup
+      ctrl.map!
+      
+      @controllers << ctrl
     end
     self
   end
@@ -273,7 +279,7 @@ class EApp
     app
     map = {}
     @controllers.each do |c|
-      c.first.url_map.each_pair do |r, s|
+      c.url_map.each_pair do |r, s|
         s.each_pair { |rm, as| (map[r] ||= {})[rm] = as.dup.unshift(c.first) }
       end
     end
@@ -331,12 +337,6 @@ class EApp
     app, builder = self, ::Rack::Builder.new
     use.each { |w| builder.use w[:ware], *w[:args], &w[:proc] }
     @controllers.each do |ctrl|
-      ctrl, global_setup = ctrl
-
-      ctrl.app = self
-      ctrl.setup!
-      ctrl.global_setup! &global_setup
-      ctrl.map!
 
       ctrl.url_map.each_pair do |route, rest_map|
         builder.map route do

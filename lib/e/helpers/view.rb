@@ -58,7 +58,7 @@ class << E
 
   def engine_ext? action = nil
     @view__engine_ext ||= {}
-    @view__engine_ext[action] || @view__engine_ext[:*]
+    @view__engine_ext[action] || @view__engine_ext[:*] || engine_default_ext?(engine?(action).first)
   end
 
   engine_default_ext = ::Tilt.mappings.sort { |a, b| b.first.size <=> a.first.size }.
@@ -139,11 +139,13 @@ class << E
   def view_path! path, keep_existing = false
     return if locked? || (@view__path == false && keep_existing)
     path = normalize_path(path.to_s << '/').sub(/\/+\Z/, '/')
-    path =~ /\A\// ? view_fullpath!(path, keep_existing) : @view__path = path.freeze
+    path =~ /\A\// ? 
+      view_fullpath!(path, keep_existing) : 
+      @view__path = path.freeze
   end
 
   def view_path?
-    @view__path ||= 'view/'.freeze
+    @view__deducted_path ||= (p = view_fullpath?) ? p : ('' << app.root << (@view__path || 'view/')).freeze
   end
 
   def view_fullpath path
@@ -201,67 +203,40 @@ end
 
 class E
 
-  def engine action = action_with_format
-    self.class.engine? action
-  end
-
-  def engine_ext action = action_with_format
-    self.class.engine_ext?(action) ||
-        self.class.engine_default_ext?(engine(action).first)
-  end
-
-  def layout action = action_with_format
-    self.class.layout? action
-  end
-
-  def view_path
-    self.class.view_path?
-  end
-
-  def view_fullpath
-    self.class.view_fullpath?
-  end
-
-  def layouts_path
-    self.class.layouts_path?
-  end
-
   def render *args, &proc
-    action, scope, locals, compiler_key = __e__engine_params(*args)
-    engine_class, engine_opts = engine action
-    engine_args = proc ? [engine_opts] : [__e__template(action), engine_opts]
-    output = __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render scope, locals
+    controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+    engine_class, engine_opts = controller.engine?(action_or_template)
+    engine_args = proc ? [engine_opts] : [__e__template(controller, action_or_template), engine_opts]
+    output = __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render(scope, locals)
 
-    layout, layout_proc = __e__layout_template(self[action] ? action : action())
+    # looking for layout of given action
+    # or the one of current action
+    layout, layout_proc = controller.layout?(controller[action_or_template] ? action_or_template : action_with_format)
     return output unless layout || layout_proc
 
-    engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
+    engine_args = layout_proc ? [engine_opts] : [__e__layout_template(controller, layout, controller.engine_ext?(action_or_template)), engine_opts]
     __e__engine_instance(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals) { output }
   end
 
   def render_partial *args, &proc
-    action, scope, locals, compiler_key = __e__engine_params(*args)
-    engine_class, engine_opts = engine action
-    engine_args = proc ? [engine_opts] : [__e__template(action), engine_opts]
-    __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render scope, locals
+    controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+    engine_class, engine_opts = controller.engine?(action_or_template)
+    engine_args = proc ? [engine_opts] : [__e__template(controller, action_or_template), engine_opts]
+    __e__engine_instance(compiler_key, engine_class, *engine_args, &proc).render(scope, locals)
   end
+  alias render_p render_partial
 
   def render_layout *args, &proc
-    action, scope, locals, compiler_key = __e__engine_params(*args)
-    engine_class, engine_opts = engine action
-    layout, layout_proc = __e__layout_template action
-    layout || layout_proc || raise('seems there are no layout defined for %s#%s action' % [self.class, action])
-    engine_args = layout_proc ? [engine_opts] : [layout, engine_opts]
+    controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+    engine_class, engine_opts = controller.engine?(action_or_template)
+    # render layout of given action
+    # or use given action_or_template as template name
+    layout, layout_proc = controller[action_or_template] ? controller.layout?(action_or_template) : action_or_template.to_s
+    layout || layout_proc || raise('seems there are no layout defined for %s#%s action' % [controller, action_or_template])
+    engine_args = layout_proc ? [engine_opts] : [__e__layout_template(controller, layout, controller.engine_ext?(action_or_template)), engine_opts]
     __e__engine_instance(compiler_key, engine_class, *engine_args, &layout_proc).render(scope, locals, &(proc || proc() { '' }))
   end
-
-  def render_file file, scope = nil, locals = nil, &proc
-    file, scope, locals, compiler_key = __e__engine_params(file, scope, locals)
-    ::File.extname(file).size == 0 && file << engine_ext(action_with_format)
-    path = view_fullpath ? '' << view_fullpath : '' << app_root << view_path
-    engine_class, engine_opts = engine(action_with_format)
-    __e__engine_instance(compiler_key, engine_class, path << file, engine_opts).render(scope, locals, &proc)
-  end
+  alias render_l render_layout
 
   ::Tilt.mappings.inject({}) do |map, s|
     s.last.each { |e| map.update e.to_s.split('::').last.sub(/Template\Z/, '').downcase => e }
@@ -269,41 +244,42 @@ class E
   end.each_pair do |suffix, engine|
 
     # this can be easily done via `define_method`,
-    # however, ruby1.8 does not support default params for procs
+    # however, ruby 1.8 does not support default params for procs
     # TODO: use `define_method` when 1.8 support dropped.
     class_eval <<-RUBY
-      def render_#{suffix} *args, &proc
-        file, scope, locals = nil, self, {}
-        args.each{ |a| (a.is_a?(String) || a.is_a?(Symbol)) ? (file = a.to_s) : (a.is_a?(Hash) ? locals = a : scope = a) }
-        compiler_key = locals.delete('')
-        
-        if file
-          # using explicit extension only if given file has no extension
-          ::File.extname(file).size == 0 && file << '.#{suffix}'
-          file = (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) << file
-          
-          # both file and proc given, using file as layout and block as template
-          return __e__engine_instance(compiler_key, #{engine}, file).render(scope, locals, &proc) if proc
-          
-          # only file given, using it as template
-          return __e__engine_instance(compiler_key, #{engine}, file).render(scope, locals)
-        end
-        
-        # block given, using it as template
-        return __e__engine_instance(compiler_key, #{engine}, &proc).render(scope, locals) if proc
-        
-        # no file nor proc given, rendering current action
-        #
-        # please note that explicit extension will be used even if action coming with format.
-        # class App < E
-        #   format :xml
-        #  
-        #   def some_action
-        #     render_erb # will render some_action.xml.erb
-        #   end
-        # end
-        __e__engine_instance(compiler_key, #{engine}, __e__template(action_with_format, '.#{suffix}')).render(scope, locals)
-      end
+
+    def render_#{suffix} *args, &proc
+      controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+      engine_args = proc ? [] : [__e__template(controller, action_or_template, '.#{suffix}')]
+      output = __e__engine_instance(compiler_key, #{engine}, *engine_args, &proc).render(scope, locals)
+
+      # looking for layout of given action
+      # or the one of current action
+      layout, layout_proc = controller.layout?(controller[action_or_template] ? action_or_template : action_with_format)
+      return output unless layout || layout_proc
+
+      engine_args = layout_proc ? [] : [__e__layout_template(controller, layout, '.#{suffix}')]
+      __e__engine_instance(compiler_key, #{engine}, *engine_args, &layout_proc).render(scope, locals) { output }
+    end
+
+    def render_#{suffix}_partial *args, &proc
+      controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+      engine_args = proc ? [] : [__e__template(controller, action_or_template, '.#{suffix}')]
+      __e__engine_instance(compiler_key, #{engine}, *engine_args, &proc).render(scope, locals)
+    end
+    alias render_#{suffix}_p render_#{suffix}_partial
+
+    def render_#{suffix}_layout *args, &proc
+      controller, action_or_template, scope, locals, compiler_key = __e__engine_params(*args)
+      # render layout of given action
+      # or use given action_or_template as template name
+      layout, layout_proc = controller[action_or_template] ? controller.layout?(action_or_template) : action_or_template.to_s
+      layout || layout_proc || raise('seems there are no layout defined for %s#%s action' % [controller, action_or_template])
+      engine_args = layout_proc ? [] : [__e__layout_template(controller, layout, '.#{suffix}')]
+      __e__engine_instance(compiler_key, #{engine}, *engine_args, &layout_proc).render(scope, locals, &(proc || proc() { '' }))
+    end
+    alias render_#{suffix}_l render_#{suffix}_layout
+      
     RUBY
 
   end
@@ -349,19 +325,21 @@ class E
   private
 
   def __e__engine_params *args
-    action, scope, locals = action_with_format, self, {}
+    controller, action_or_template, scope, locals = self.class, action_with_format, self, {}
     args.compact.each do |arg|
       case
+        when ::AppetiteUtils.is_app?(arg)
+          controller = arg
         when arg.is_a?(Symbol), arg.is_a?(String)
-          action = arg
+          action_or_template = arg
         when arg.is_a?(Hash)
           locals = arg
         else
           scope = arg
       end
     end
-    compiler_key = locals.delete('')
-    [action, scope, locals, compiler_key]
+    compiler_key = locals.delete ''
+    [controller, action_or_template, scope, locals, compiler_key]
   end
 
   def __e__engine_instance compiler_key, engine, *args, &proc
@@ -376,19 +354,18 @@ class E
   # otherwise given argument is used as path.
   #
   # @param [Symbol, String] action_or_path
-  def __e__template action_or_path, ext = nil
-    route = self[action_or_path] || action_or_path.to_s
-    (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) <<
-        route << (ext || engine_ext(action_or_path))
+  def __e__template controller, action_or_template, ext = nil
+    '' << controller.view_path?  <<                        # controller's path to templates
+      controller.base_url << '/' <<                        # controller's route
+      action_or_template.to_s <<                           # given template
+      (ext || controller.engine_ext?(action_or_template))  # given or deducted extension
   end
 
-  def __e__layout_template action, ext = nil
-    layout, layout_proc = self[action] ? layout(action) : action.to_s
-    return unless layout
-    layout = layout_proc ? nil :
-        (view_fullpath ? '' << view_fullpath : '' << app_root << view_path) <<
-            layouts_path << layout << (ext || engine_ext(action))
-    [layout, layout_proc]
+  def __e__layout_template controller, layout, ext
+    '' << controller.view_path? <<     # controller's path to templates
+      controller.layouts_path?  <<     # controller's path to layouts
+      layout <<                        # given template
+      (ext || '')                      # given or deducted extension
   end
 
 end

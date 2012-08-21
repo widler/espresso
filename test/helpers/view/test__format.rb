@@ -52,13 +52,8 @@ module EViewTest__Format
     def template template
       render do
         @greeting = __method__
-        render_file template
+        render_partial template
       end
-    end
-
-    def adhoc template
-      @greeting = __method__
-      render_erb template
     end
 
     def string
@@ -97,13 +92,8 @@ module EViewTest__Format
 
       Should 'ignore format when arbitrary template rendered' do
         is?(get('template.html', :index).body) == 'format-less layout/template'
-        is?(get('template.xml', 'some-action.erb').body) == 'format-less layout/template'
-        is?(get(:template, 'api.json.erb').body) == 'format-less layout/'
-      end
-
-      Should 'ignore format when ad hoc engine used' do
-        is?(get('adhoc.html', :index).body) == 'adhoc'
-        is?(get('adhoc.xml', 'some-action.erb').body) == 'adhoc'
+        is?(get('template.xml', 'some___action').body) == 'format-less layout/template'
+        is?(get(:template, 'api.json').body) == 'format-less layout/'
       end
 
       Should 'correctly resolve path(and use the layout of rendered action) when action provided with format' do

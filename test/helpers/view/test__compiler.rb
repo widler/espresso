@@ -1,5 +1,6 @@
 module EViewTest__Compiler
   class App < E
+    map '/'
 
     before do
       if key = params[:__update_compiler__]

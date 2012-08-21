@@ -1,77 +1,105 @@
-module EViewTest__render_erb
+module EViewTest__RenderERB
   class App < E
-    map '/'
-    
-    format :xml
+    map '/adhoc'
+    layout :master
+    layouts_path 'adhoc/layouts'
+    format :html
 
-    def index greeting
-      @greeting = greeting
-      render_erb __method__.to_s
-    end
-    
-    def blah
+    def index
       render_erb
     end
 
-    def get_layout layout
-      render_erb layout do
-        'World'
-      end
+    def partial
+      render_erb_p
     end
 
-    def given file
-      render_erb file
+    def given template
+      render_erb template
     end
 
-    def inline
+    def given_partial template
+      render_erb_p template
+    end
+
+    def inline greeting
+      @greeting = greeting
       render_erb do
-        <<-HTML
-        Hello <%= params[:greeting] %>!
-        HTML
+        "Hello <%= @greeting %>"
       end
     end
+
+    def inline_partial greeting
+      @greeting = greeting
+      render_erb_p do
+        "Hello <%= @greeting %>"
+      end
+    end
+
+    def layout template
+      render_erb_l template do
+        @template = template
+        render_erb_p { "Hello <%= @template %>" }
+      end
+    end
+
+
 
   end
 
   Spec.new App do
 
-    r = get 'World'
-    is?(r.body) == 'World'
+    Testing 'current action' do
+      Should 'render with layout' do
+        get
+        is?(last_response.body) == 'master layout - index'
+        
+        get 'index.html'
+        is?(last_response.body) == 'master layout - index.html'
+      end
 
-    r = get :Blah!
-    is?(r.body) == 'Blah!'
-    
-    Should :render_current_action do
-      get :blah
-      expect(last_response.body) == "blah.erb - blah"
-      
-      Should 'use extension even when action used with format' do
-        get "blah.xml"
-        expect(last_response.body) == "blah.xml.erb"
+      Should 'render without layout' do
+        get :partial
+        is?(last_response.body) == 'partial'
+        
+        get 'partial.html'
+        is?(last_response.body) == 'partial.html'
       end
     end
 
-    Should 'render as layout' do
-      r = get :layout, :layout
-      is?(r.body) == 'Hello World!'
+    Testing 'given template' do
+      Should 'render with layout' do
+        get :given, :index
+        is?(last_response.body) == 'master layout - given'
+        
+        get 'given.html', :partial
+        is?(last_response.body) == 'master layout - given.html'
+      end
 
-      r = get :layout, 'layout__master'
-      is?(r.body) == 'Hello World!'
-
-      r = get :layout, 'layout__custom_context', :foo => 'bar', :sensitive_data => 'Blah!'
-      is?(r.body) == 'layout-foo=bar;layout-sensitive_data=Blah!;World'
+      Should 'render without layout' do
+        get :given_partial, :partial
+        is?(last_response.body) == 'given_partial'
+        
+        get 'given_partial.html', :index
+        is?(last_response.body) == 'given_partial.html'
+      end
     end
 
-    Should 'render as regular file' do
-      r = get :given, 'some-action'
-      is?(r.body) == 'given'
+    Testing 'inline rendering' do
+      Should 'render with layout' do
+        get :inline, :World
+        is?(last_response.body) == 'master layout - Hello World'
+      end
+
+      Should 'render without layout' do
+        get :inline_partial, :World
+        is?(last_response.body) == 'Hello World'
+      end
     end
 
-    Should 'keep given extension' do
-      is?(get(:given, 'some-file.xhtml').body) == 'given/some-file.xhtml'
+    Testing :render_layout do
+      get :layout, :master
+      is?(last_response.body) == 'master layout - Hello master'
     end
-
-    expect { get(:inline, :greeting => 'World').body.strip } == 'Hello World!'
 
   end
 end

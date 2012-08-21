@@ -1,4 +1,4 @@
-module EViewTest__render_layout
+module EViewTest__RenderLayout
   class App < E
     class Sandbox
       attr_reader :params

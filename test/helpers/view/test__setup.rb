@@ -65,7 +65,7 @@ module EViewTest__SetupByController
 
     Testing :view_path do
       Ensure 'it is overridden by slice' do
-        expect(App.view_path?) == 'slice/'
+        expect(App.view_path?) =~ /slice\/\Z/
       end
     end
 
@@ -95,7 +95,7 @@ module EViewTest__SetupBySlice
 
     expect(App.engine_ext?) == '.xHTML'
     expect(App.layout?.first) == 'slice'
-    expect(App.view_path?) == 'slice/'
+    expect(App.view_path?) =~ /slice\/\Z/
     expect(App.layouts_path?) == 'slice/'
     expect(App.compiler_pool?[:set_by]) == :slice
 

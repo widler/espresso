@@ -40,14 +40,10 @@ module EViewTest__Relpath
       end
     end
 
-    def get_render_file file
-      render_file file
-    end
-
   end
 
   Spec.new self do
-    app EApp.new{ root File.expand_path '..', __FILE__ }.mount(App)
+    app EApp.new { root File.expand_path '..', __FILE__ }.mount(App)
 
     get
     expect(last_response.body) == "Hello World!"
@@ -59,16 +55,13 @@ module EViewTest__Relpath
     expect(last_response.body) == "Hello blah.erb - given_action!"
 
     get :given_tpl, :partial
-    expect(last_response.body) == "Hello get_partial!"
+    expect(last_response.body) == "Hello partial!"
 
     get :render_layout_action, :get_render_layout_action
     expect(last_response.body) == "format-less layout/get_render_layout_action"
 
     get :render_layout_file, :layout__format
     expect(last_response.body) == "format-less layout/layout__format"
-
-    get :render_file, 'custom_locals.erb', :foo => 'bar'
-    expect(last_response.body) == "foo=bar"
 
   end
 end
