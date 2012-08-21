@@ -199,34 +199,94 @@ end
 
 # Render
 
-## Rendering Actions/Templates
+## `render` and `render_partial`
+
+To *render the template of current action*, simply call `render` without arguments.
+
+```ruby
+class App < E
+  
+  map 'news'
+  view_path 'base/views'
+  layout :master
+  engine :Haml
+
+  def some_action
+      # ...
+      render  # will render base/views/news/some_action.haml, using :master layout
+  end
+
+  def some__another_action
+      # ...
+      render_partial  # will render base/views/news/some__another_action.haml, without layout
+  end
+
+end
+```
+
+**Important:** Template name should exactly match the name of current action, including REST verb, if any.
+
+```ruby
+def get_latest
+  render # will try to render base/views/news/get_latest.haml
+end
+
+def post_latest
+  render # will try to render base/views/news/post_latest.haml
+end
+```
+
+Also, if current action called with a specific format, template name should contain it.
+
+```ruby
+class App < E
+  
+  map '/'
+  format :xml, :html
+
+  def post_latest
+    render  # on /latest      it will render view/post_latest.erb
+            # on /latest.xml  it will render view/post_latest.xml.erb
+            # on /latest.html it will render view/post_latest.html.erb
+  end
+end
+```
 
 
-Here we will speak about `render` and `render_partial` methods.
+To *render a template by name*, pass it as first argument.
 
-**Arguments**
+```ruby
+render :some__another_action   # will render base/views/news/some__another_action.haml
 
-Both methods accepts from 0 to 3 arguments - the action/template, the scope and the locals.
+render 'some_action.xml'       # will render base/views/news/some_action.xml.haml
 
-If no arguments provided, it will render the template of current action with default scope and default locals.<br/>
+render 'some-template'         # will render base/views/news/some-template.haml
+
+render 'some-template.html'    # will render base/views/news/some-template.html.haml
+```
+
+
+To *render a template of inner controller*, pass controller as first argument and the template as second.
+
+```ruby
+class Articles < E
+  
+  view_path 'templates'
+  engine :Slim
+  # ...
+end
+
+render Articles, :most_popular         # will render templates/articles/most_popular.slim
+render Articles, 'some-template.xml'   # will render templates/articles/some-template.xml.slim
+```
+
+
+*Scope* and *Locals* can be passed as consequent arguments, orderlessly.<br/>
 The scope is defaulted to current one and locals to an empty Hash.
 
-**Template**
 
-If first argument is an existing action, the action's URL will be used as path to template.<br/>
-Otherwise it will be used as path to template.
-
-*Please note* that action can be provided along with format.
-
-The path is built as follow:<br/>
-*path to templates + path to template + extension*
-
-For extension will be used the explicitly defined extension(at class level)
+As *extension* will be used the explicitly defined extension(at class level)
 or the default extension of used engine.
-
-If block given, the template will not be searched/rendered.<br/>
-Instead, it will render the string returned by the block, a.k.a. inline rendering.<br/>
-This way you'll can render data from DB directly, without saving it to file system.
 
 **Layout**
 
@@ -236,82 +296,14 @@ This way you'll can render data from DB directly, without saving it to file syst
 
 **Engine**
 
-For engine will be used the effective engine for current context.<br/>
+As engine will be used the effective engine for current context.<br/>
 Meant engine defined for current or given action,
 or engine defined for all actions,
 or default engine - ERB.
 
-**Examples**
-
-*Note:* "render current action" term refers to "render the template of current action"
-
-*Render current action*
-
-```ruby
-render
-```
-
-*Render current action within custom scope*
-
-```ruby
-render Object.new
-```
-
-*Render current action with custom locals*
-
-```ruby
-render :some_var => "some val"
-```
-
-*Render current action within custom scope and locals*
-
-```ruby
-render Object.new, :some_var => "some val"
-```
-
-*Render current action partially*
-
-```ruby
-render_partial
-```
-
-*Render current action partially within custom scope*
-
-```ruby
-render_partial SomeSandboxClass.new
-```
-
-*Render :news action. This will render the :news action's layout, if any.*
-
-```ruby
-render :news
-```
-
-*Render .html template of :news action*
-
-```ruby
-render 'news.html'
-```
-
-*Partially render :banners template, with custom locals*
-
-```ruby
-render_partial :banners, :some_var => "some val"
-```
-
-*Render "books" template(:books action does not exists). This will use the current action layout, if any.*
-
-```ruby
-render "books"
-```
-
-*Render "users/online" template without layout, with custom locals*
-
-```ruby
-render_partial "users/online", :some_var => "some val"
-```
-
-etc.
+If block given, the template will not be searched/rendered.<br/>
+Instead, it will render the string returned by the block, a.k.a. *inline rendering*.<br/>
+This way you'll can render data from DB directly, without saving it to file system.
 
 
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
@@ -320,8 +312,7 @@ etc.
 ## Rendering Layouts
 
 
-
-`render_layout` will render the layout of current(or given) action or an arbitrary layout.
+`render_layout` will render the layout of current(or given) action or an arbitrary layout file.
 
 **Arguments**
 
@@ -336,6 +327,10 @@ If called without arguments it will render the layout of current action.
 
 If first argument is an existing action, the layout of given action will be rendered.<br/>
 Otherwise first argument will be used as path to layout.
+
+*Please note* that when providing layout as file, 
+it wont take in count controller's route(as per `render_partial`), 
+so you should provide path in full(relative to templates path).
 
 *Please note* that action can also be provided with format.
 
@@ -422,52 +417,18 @@ end
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 
-## Rendering Files
-
-
-`render_file` will render an arbitrary file at the path given as first argument.
-
-**Arguments**
-
-Accepts from 1 to 3 arguments - the file, the scope and the locals.<br/>
-The scope is defaulted to current one and locals to an empty Hash.
-
-The only required argument is the first one - the file.
-
-If a block passed, the given file will be treated as a layout,
-so it should contain the `yield` statement
-that will be replaced with the string returned by the given block.
-
-**Template**
-
-The path to template is built as follow:<br/>
-*path to templates + given file path + extension*
-
-If given file has no extension, it will use the effective extension for current context.
-
-The effective extension is the explicitly defined extension(at class level)
-or the default extension of used engine.
-
-**Engine**
-
-For engine will be used the effective engine for current context.<br/>
-Meant engine defined for current action,
-or engine defined for all actions,
-or default engine - ERB.
-
-
-**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
-
 
 ## Ad hoc Engines
 
 
-`render_{engine}` method used for cases when a template should be "quickly" rendered
+`render_{engine}` and `render_{engine}_file` methods used for cases when a template or action should be "quickly" rendered
 using a specific engine, without any previous class level setups.
 
-For example, to render a Haml template, use `render_haml`.
+For example, to render a Haml template of current controller, use `render_haml`.
 
-It accepts from 0 to 3 arguments - the file, the scope and the locals.<br/>
+To render 
+
+It accepts from 0 to 3 arguments - the action/file, the scope and the locals.<br/>
 The scope is defaulted to current one and locals to an empty Hash.
 
 If no file and no block given, current action will be rendered.<br/>

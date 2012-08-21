@@ -102,9 +102,8 @@ App.run
 [Layouts Path](https://github.com/slivu/espresso/blob/master/ViewAPI.md#layouts-path) |
 [Layout](https://github.com/slivu/espresso/blob/master/ViewAPI.md#layout)
 <br/>
-[Rendering Actions/Templates](https://github.com/slivu/espresso/blob/master/ViewAPI.md#rendering-actionstemplates) |
+[Rendering Actions/Templates](https://github.com/slivu/espresso/blob/master/ViewAPI.md#render) |
 [Rendering Layouts](https://github.com/slivu/espresso/blob/master/ViewAPI.md#rendering-layouts) |
-[Rendering Files](https://github.com/slivu/espresso/blob/master/ViewAPI.md#rendering-files) |
 [Ad hoc Engines](https://github.com/slivu/espresso/blob/master/ViewAPI.md#ad-hoc-engines) |
 [Templates Compilation](https://github.com/slivu/espresso/blob/master/ViewAPI.md#templates-compilation)
 
