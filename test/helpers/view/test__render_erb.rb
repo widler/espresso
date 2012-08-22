@@ -105,19 +105,21 @@ module EViewTest__RenderERB
         render_erb Inner, :custom_layout
       end
 
-
     end
 
     class Inner < E
       map '/inner'
       engine :Haml
-      view_path :templates
+      view_path 'templates/adhoc'
       layouts_path :inner
       layout :layout
       format :xml
 
       setup :custom_layout do
         layout :layout_custom
+      end
+
+      def custom_layout
       end
 
     end
@@ -240,7 +242,7 @@ module EViewTest__RenderERB
 
       Testing 'custom layout' do
         get :custom_layout
-        check(last_response.body) == 'inner layout - inner__custom_layout'
+        check(last_response.body) == 'custom layout - inner__custom_layout'
       end
 
     end
