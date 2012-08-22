@@ -349,11 +349,6 @@ class E
         __e__.sync { compiler_pool[key] = engine.new(*args, &proc) }
   end
 
-  # building path to template.
-  # if given argument is an existing action, the action route will be used.
-  # otherwise given argument is used as path.
-  #
-  # @param [Symbol, String] action_or_path
   def __e__template controller, action_or_template, ext = nil
     '' << controller.view_path?  <<                        # controller's path to templates
       controller.base_url << '/' <<                        # controller's route

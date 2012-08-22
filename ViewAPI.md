@@ -201,7 +201,7 @@ end
 
 ## `render` and `render_partial`
 
-To *render the template of current action*, simply call `render` without arguments.
+To *render the template of current action*, simply call `render` or `render_partial` without arguments.
 
 ```ruby
 class App < E
@@ -256,13 +256,13 @@ end
 To *render a template by name*, pass it as first argument.
 
 ```ruby
-render :some__another_action   # will render base/views/news/some__another_action.haml
+render :some__another_action      # will render base/views/news/some__another_action.haml
 
-render 'some_action.xml'       # will render base/views/news/some_action.xml.haml
+render_partial 'some_action.xml'  # will render base/views/news/some_action.xml.haml
 
-render 'some-template'         # will render base/views/news/some-template.haml
+render 'some-template'            # will render base/views/news/some-template.haml
 
-render 'some-template.html'    # will render base/views/news/some-template.html.haml
+render_p 'some-template.html'     # will render base/views/news/some-template.html.haml
 ```
 
 

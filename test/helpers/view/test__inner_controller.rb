@@ -2,54 +2,55 @@ module EViewTest__InnerController
   module App
     class Index < E
       map '/'
+      engine :Haml
       layout :master
       layouts_path 'inner-controller/layouts'
       format :html
       
       def index
-        render_erb Inner
+        render Inner
       end
 
       def partial
-        render_erb_p Inner
+        render_p Inner
       end
 
       def given template
-        render_erb Inner, template
+        render Inner, template
       end
 
       def given_partial template
-        render_erb_p Inner, template
+        render_p Inner, template
       end
 
       def inline greeting
         @greeting = greeting
-        render_erb Inner do
+        render Inner do
           "Hello World"
         end
       end
 
       def inline_partial greeting
         @greeting = greeting
-        render_erb_p Inner do
+        render_p Inner do
           "Hello World"
         end
       end
 
       def layout
-        render_erb_l Inner do
+        render_l Inner do
           "Hello World"
         end
       end
 
       def given_layout template
-        render_erb_l Inner, template do
+        render_l Inner, template do
           "Hello World"
         end
       end
 
       def custom_layout
-        render_erb Inner, :custom_layout
+        render Inner, :custom_layout
       end
 
 
@@ -57,7 +58,7 @@ module EViewTest__InnerController
 
     class Inner < E
       map '/inner-controller'
-      engine :Haml
+      engine :ERB
       view_path :templates
       layouts_path 'inner-controller'
       layout :layout
