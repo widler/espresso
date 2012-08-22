@@ -199,7 +199,7 @@ end
 
 # Render
 
-## `render` and `render_partial`
+## Rendering Templates
 
 To *render the template of current action*, simply call `render` or `render_partial` without arguments.
 
@@ -282,7 +282,7 @@ render Articles, 'some-template.xml'   # will render templates/articles/some-tem
 
 
 *Scope* and *Locals* can be passed as consequent arguments, orderlessly.<br/>
-The scope is defaulted to current one and locals to an empty Hash.
+The scope is defaulted to the current controller and locals to an empty Hash.
 
 
 As *extension* will be used the explicitly defined extension(at class level)
@@ -305,9 +305,8 @@ or default engine - ERB.
 **Inline rendering**
 
 If block given, the template will not be searched/rendered.<br/>
-Instead, it will render the string returned by the block.<br/>
+Instead, the string returned by the block will be rendered.<br/>
 This way you'll can render data from DB directly, without saving it to file system.
-
 
 *=== Important ===* If custom controller given, rendering methods will use the path, engine and layout set by given controller.
 
@@ -319,42 +318,6 @@ This way you'll can render data from DB directly, without saving it to file syst
 
 `render_layout` will render the layout of current(or given) action or an arbitrary layout file.
 
-**Arguments**
-
-Accepts from 0 to 3 arguments - the action/layout, the scope and the locals.<br/>
-The scope is defaulted to current one and locals to an empty Hash.
-
-If no arguments provided, it will render the layout of current action.
-
-**Layout**
-
-If called without arguments it will render the layout of current action.
-
-If first argument is an existing action, the layout of given action will be rendered.<br/>
-Otherwise first argument will be used as path to layout.
-
-*Please note* that when providing layout as file, 
-it wont take in count controller's route(as per `render_partial`), 
-so you should provide path in full(relative to templates path).
-
-*Please note* that action can also be provided with format.
-
-The path is built as follow:<br/>
-*path to layouts + path to layout + extension*
-
-For extension will be used the explicitly defined extension
-or the default extension of used engine.
-
-The layout should contain the `yield` statement
-that will be replaced with the string returned by given block.<br/>
-If no block given, the `yield` statement will be replaced by an empty string.
-
-**Engine**
-
-All the same as per `render` and `render_partial`.
-
-
-**Examples**
 
 *Render the layout of current action*
 
@@ -394,13 +357,14 @@ render_layout 'news.html' do
 end
 ```
 
-*Render the layout of :news action with custom locals*
+*Render layout of :latest action of News controller*
 
 ```ruby
-render_layout :some_var => "some val" do
+render_layout News, :latest do
     'some string'
 end
 ```
+
 
 *Render an arbitrary file as layout*
 
@@ -410,47 +374,28 @@ render_layout 'layouts/master' do
 end
 ```
 
-*Render an arbitrary file as layout within custom scope*
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
+## Ad hoc rendering
+
+Any of `render`, `render_partial` and `render_layout` methods has ad hoc counterparts,
+like `render_haml`, `render_erb_partial`, `render_liquid_layout` and so on.
+
+Works exactly as common rendering methods except they are using a custom engine and extension.
+
+Used when you need to "quickly" render a template, without any previous class-level setups.
 
 ```ruby
-render_layout 'layouts/master', Object.new do
-    'some string'
-end
+render_haml        # will render the template and layout of current action using Haml engine
+
+render_haml_p      # will render only the template of current action using Haml engine
+
+render_haml_l      # will render only the layout of current action using Haml engine
 ```
 
-
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
-
-
-
-## Ad hoc Engines
-
-
-`render_{engine}` and `render_{engine}_file` methods used for cases when a template or action should be "quickly" rendered
-using a specific engine, without any previous class level setups.
-
-For example, to render a Haml template of current controller, use `render_haml`.
-
-To render 
-
-It accepts from 0 to 3 arguments - the action/file, the scope and the locals.<br/>
-The scope is defaulted to current one and locals to an empty Hash.
-
-If no file and no block given, current action will be rendered.<br/>
-If a file and a block given, the file should be a layout, i.e. should contain `yield` statement.<br/>
-If block given and the file is not, the string returned by block will be used as template, a.k.a inline rendering.
-
-If given file has no extension, it will use the method suffix.<br/>
-For example, `render_haml` will add ".haml" extension to files,<br/>
-`render_less` will add ".less",<br/>
-`render_liquid` will add ".liquid", etc.
-
-If both a file and a block given, the given file will be treated as a layout,
-so it should contain the `yield` statement
-that will be replaced with the string returned by given block.
-
-**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
-
 
 ## Templates Compilation
 
