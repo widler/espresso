@@ -159,9 +159,9 @@ Test results:
 
     ---
                 Speed  Overhead  1ms-app  5ms-app  10ms-app  20ms-app  50ms-app  100ms-app
-      espresso  5518   0.18ms    846      193      98        49        19        9
+      espresso  5518   0.18ms    847      193      98        49        19        9
        sinatra  3629   0.28ms    783      189      97        49        19        9
-         rails  792    1.26ms    441      159      88        47        19        9
+         rails  792    1.26ms    442      159      88        47        19        9
     ---
 
 **1ms-app** shows your app speed when your actions takes **1ms** to run.<br/>
@@ -174,11 +174,11 @@ The app speed are calculated as follow:
 
 So, if your actions takes about 1ms and you use a framework with overhead of 0.18ms, the app speed will be:
 
-    1000 / ( 1 + 0.18 ) = 846 requests per second
+    1000 / ( 1 + 0.18 ) = 847 requests per second
 
 However, if framework's overhead is of **1ms** or more, the app speed will decrease dramatically:
 
-    1000 / ( 1 + 1.26 ) = 441 requests per second
+    1000 / ( 1 + 1.26 ) = 442 requests per second
 
 
 **Conclusions?**
