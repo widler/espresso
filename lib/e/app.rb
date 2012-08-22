@@ -280,7 +280,7 @@ class EApp
     map = {}
     @controllers.each do |c|
       c.url_map.each_pair do |r, s|
-        s.each_pair { |rm, as| (map[r] ||= {})[rm] = as.dup.unshift(c.first) }
+        s.each_pair { |rm, as| (map[r] ||= {})[rm] = as.dup.unshift(c) }
       end
     end
 
