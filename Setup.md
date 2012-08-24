@@ -247,4 +247,40 @@ That's it.
 *Please note* bang method, it will ensure that initial setup will be overridden.<br/>
 There are bang methods for all Espresso setups.
 
+
+Passing setup proc at mount is not the only way to setup controllers.
+
+You can setup them all at once by using `app#setup` method.
+
+```ruby
+class Pages < E
+    # ...
+end
+
+class News < E
+    # ...
+end
+
+class Articles < E
+    # ...
+end
+
+app = EApp.new :automount
+app.setup do
+    # here setup will run inside all controllers
+end
+app.run
+
+# or you can setup controllers selectively - controller name are passed as first argument of setup proc
+
+app = EApp.new :automount
+app.setup do |ctrl|
+    if ctrl == Pages
+        # here setup will run ONLY inside Pages controller
+    end
+    # here setup will run inside all controllers
+end
+app.run
+```
+
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**

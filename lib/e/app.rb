@@ -237,6 +237,7 @@ class EApp
       ctrl.app = self
       ctrl.setup!
       ctrl.global_setup!(&setup) if setup
+      ctrl.global_setup!(&@global_setup) if @global_setup
       ctrl.map!
       
       @controllers << ctrl
@@ -258,10 +259,11 @@ class EApp
     self
   end
 
-  # proc given here will be executed inside app instance
+  # proc given here will be executed inside each controller,
+  # ones already mounted and ones to be mounted
   def setup &proc
-    self.instance_exec &proc
-    self
+    @global_setup = proc
+    @controllers.each { |c| c.global_setup! &proc }
   end
 
   def lock!

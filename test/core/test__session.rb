@@ -38,7 +38,7 @@ module ECoreTest__Session
   end
 
   Spec.new App do
-    app App.mount.setup { session :memory }
+    app EApp.new { session :memory }.mount(App)
     map App.route
 
     var, val = rand.to_s, rand.to_s
