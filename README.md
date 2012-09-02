@@ -4,7 +4,7 @@
             <img src="http://e.github.com/images/logo.png" />    
         </td>
         <td>
-            <h2>Espresso Framework</h2>
+            <h1>Espresso</h1>
             <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
             <p>
                 <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
