@@ -1,17 +1,17 @@
 
-<div style="float: left;">
-Espresso Framework
----
+<div style="display: inline-block;">
+<h2>Espresso Framework</h2>
 
-**Scalable Web Framework aimed at Speed and Simplicity**
+<strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
 
-[![Build Status](https://secure.travis-ci.org/slivu/espresso.png)](http://travis-ci.org/slivu/espresso)
 </div>
-<div style="float: left;">
+<div style="display: inline-block;">
     <img src="http://e.github.com/images/logo.png" />    
 </div>
 
 <div style="clear: both;"></div>
+
+[![Build Status](https://secure.travis-ci.org/slivu/espresso.png)](http://travis-ci.org/slivu/espresso)
 
 Quick Start
 ---
