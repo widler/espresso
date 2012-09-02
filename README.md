@@ -1,4 +1,4 @@
-<table width="100%" border="0">
+<table width="100%">
     <tr>
         <td>
             <img src="http://e.github.com/images/logo.png" />    
