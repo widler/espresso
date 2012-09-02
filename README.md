@@ -6,10 +6,9 @@ Espresso Framework
 **Scalable Web Framework aimed at Speed and Simplicity**
 
 [![Build Status](https://secure.travis-ci.org/slivu/espresso.png)](http://travis-ci.org/slivu/espresso)
-
 </div>
 <div style="float: left;">
-    
+    <img src="http://e.github.com/images/logo.png" />    
 </div>
 
 <div style="clear: both;"></div>
