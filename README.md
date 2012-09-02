@@ -6,7 +6,9 @@
         <td>
             <h2>Espresso Framework</h2>
             <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
-            <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
+            <p>
+                <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
+            </p>
         </td>
     </tr>
 </table>
