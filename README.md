@@ -1,8 +1,8 @@
-<div style="display: inline-block;">
+<div style="float: left;">
     <img src="http://e.github.com/images/logo.png" />    
 </div>
 
-<div style="display: inline-block;">
+<div style="float: left;">
 <h2>Espresso Framework</h2>
 
 <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
