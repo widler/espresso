@@ -1,10 +1,18 @@
 
+<div style="float: left;">
 Espresso Framework
 ---
 
 **Scalable Web Framework aimed at Speed and Simplicity**
 
 [![Build Status](https://secure.travis-ci.org/slivu/espresso.png)](http://travis-ci.org/slivu/espresso)
+
+</div>
+<div style="float: left;">
+    
+</div>
+
+<div style="clear: both;"></div>
 
 Quick Start
 ---
