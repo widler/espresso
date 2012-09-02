@@ -1,11 +1,10 @@
-<table width="100%">
+<table width="100%" border="0">
     <tr>
         <td>
             <img src="http://e.github.com/images/logo.png" />    
         </td>
         <td>
-            <h1>Espresso</h1>
-            <hr />
+            <h2>Espresso</h2>
             <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
             <p>
                 <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
