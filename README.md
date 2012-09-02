@@ -1,12 +1,12 @@
+<div style="display: inline-block;">
+    <img src="http://e.github.com/images/logo.png" />    
+</div>
 
 <div style="display: inline-block;">
 <h2>Espresso Framework</h2>
 
 <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
 
-</div>
-<div style="display: inline-block;">
-    <img src="http://e.github.com/images/logo.png" />    
 </div>
 
 <div style="clear: both;"></div>
