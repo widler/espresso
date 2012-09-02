@@ -1,15 +1,15 @@
-<div style="float: left;">
-    <img src="http://e.github.com/images/logo.png" />    
-</div>
+<table style="width: 100%;">
+    <tr>
+        <td>
+            <img src="http://e.github.com/images/logo.png" />    
+        </td>
+        <td>
+            <h2>Espresso Framework</h2>
 
-<div style="float: left;">
-<h2>Espresso Framework</h2>
-
-<strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
-
-</div>
-
-<div style="clear: both;"></div>
+            <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
+        </td>
+    </tr>
+</table>
 
 [![Build Status](https://secure.travis-ci.org/slivu/espresso.png)](http://travis-ci.org/slivu/espresso)
 
