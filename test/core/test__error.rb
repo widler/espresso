@@ -15,11 +15,7 @@ module ECoreTest__Error
     end
 
     def raise_error
-      begin
-        some risky code
-      rescue => e
-        error 500, e
-      end
+      some risky code
     end
 
   end

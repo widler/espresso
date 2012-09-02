@@ -15,11 +15,20 @@ class E
     (content_type = format? ? mime_type(format) : content_type?) && content_type!(content_type)
     (charset = __e__.explicit_charset || charset?) && charset!(charset)
 
-    (self.class.hooks?(:a, action_with_format)||[]).each { |m| self.send m }
-
-    super
-
-    (self.class.hooks?(:z, action_with_format)||[]).each { |m| self.send m }
+    begin
+      (self.class.hooks?(:a, action_with_format)||[]).each { |m| self.send m }
+      super
+      (self.class.hooks?(:z, action_with_format)||[]).each { |m| self.send m }
+    rescue => e
+      # if a handler defined at class level, use it
+      if handler = self.class.error?(500)
+        body = handler.last > 0 ? self.send(handler.first, e) : self.send(handler.first)
+        halt 500, body
+      else
+        # otherwise raise rescued exception
+        raise e
+      end
+    end
   end
 
   # this proxy used to keep methods that rely on instance variables,
@@ -281,7 +290,7 @@ class E
   def error status, body = nil
     (handler = self.class.error?(status)) &&
         (body = handler.last > 0 ? self.send(handler.first, body) : self.send(handler.first))
-    super
+    halt status.to_i, body
   end
 
   # Serving static files.

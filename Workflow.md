@@ -515,20 +515,17 @@ end
 ```ruby
 class News < E
 
-    error 500 do |message|
-        "Fatal Error Occurred: #{ message }"
+    error 500 do | exception |
+        "Fatal Error Occurred: #{ exception }"
     end
+    # now if you actions(or hooks) raise an exception, 
+    # it will be rescued and passed to your error handler.
 
     def index id
-      begin
         some risky code here
-      rescue => e
-        error 500, e.message
-        # will return 500 status code with body
-        # "Fatal Error Occurred: undefined local variable or method `here'"
-      end
-      # ...
     end
+    # will return 500 status code with body
+    # "Fatal Error Occurred: undefined local variable or method `here'"
 end
 ```
 
