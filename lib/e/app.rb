@@ -224,7 +224,8 @@ class EApp
   include Setup
 
   def initialize automount = false, &proc
-    @controllers = automount ? discover_controllers : []
+    @controllers = []
+    automount ? discover_controllers.each { |c| mount c } : []
     proc && self.instance_exec(&proc)
   end
 
@@ -261,10 +262,11 @@ class EApp
 
   # proc given here will be executed inside each controller,
   # ones already mounted and ones to be mounted
-  def setup &proc
+  def setup_controllers &proc
     @global_setup = proc
     @controllers.each { |c| c.global_setup! &proc }
   end
+  alias setup setup_controllers
 
   def lock!
     @locked = true
