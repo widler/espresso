@@ -257,23 +257,24 @@ class << E
     #    end
     # @param [Integer] code
     # @param [Proc] proc
-    def error code, method = nil, &proc
-      error?(code) || error!(code, method, &proc)
+    def error code, &proc
+      error! code, :keep_existing, &proc
     end
 
-    def error! code, method = nil, &proc
+    def error! code, keep_existing = nil, &proc
       return if locked?
       error? code
-      method || proc || raise('please provide a method name or proc')
-      method ||= proc_to_method :http, :error_procs, code, &proc
-      @error_handlers[code] = [method, instance_method(method).arity]
+      raise('please provide a proc to be executed on errors') unless proc
+      method = proc_to_method :http, :error_procs, code, &proc
+      setup__actions.each do |a|
+        next if @error_handlers[code][a] && keep_existing
+        @error_handlers[code][a] = [method, instance_method(method).arity]
+      end
     end
 
-    def error? code
-      # returning the concrete item instead of entire hash
-      # to make sure the error setup will not be altered at run time
-      @error_handlers ||= {}
-      @error_handlers[code]
+    def error? code, action = nil
+      (@error_handlers ||= {})[code] ||= {}
+      @error_handlers[code][action] || @error_handlers[code][:*]
     end
 
     private
