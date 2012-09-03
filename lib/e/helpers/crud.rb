@@ -14,7 +14,7 @@ class << E
     presenter = lambda { |controller_instance, obj| proc ? controller_instance.instance_exec(obj, &proc) : obj }
     fetch_object = lambda do |controller_instance, id|
       resource.send(resource_method[:get], id) ||
-          controller_instance.error(404, 'object with ID %s not found' % controller_instance.escape_html(id))
+          controller_instance.halt(404, 'object with ID %s not found' % controller_instance.escape_html(id))
     end
     update_object = lambda do |controller_instance, request_method, id|
       object = fetch_object.call(controller_instance, id)
@@ -52,8 +52,20 @@ class << E
         meth = resource_method[:delete]
         if resource.respond_to?(meth)
           resource.send(meth, id)
-        elsif object = fetch_object.call(id)
-          object.send meth
+        elsif object = fetch_object.call(self, id)
+          if object.respond_to?(meth)
+            object.send meth
+          elsif object.respond_to?(:delete!)
+            object.send :delete!
+          elsif object.respond_to?(:destroy)
+            object.send :destroy
+          elsif object.respond_to?(:destroy!)
+            object.send :destroy!
+          else
+            halt 500, 'Given object does not respond to any of #%s' % [
+              meth, :delete!, :destroy, :destroy!
+            ].uniq.join(" #")
+          end
         end
         ''
       end
