@@ -3,8 +3,8 @@ module EHelpersTest__Cache
   class App < E
 
     before do
-      if key = params[:__update_cache__]
-        key == '*' ? update_cache! : update_cache!(key.to_sym)
+      if key = params[:__clear_cache__]
+        key == '*' ? clear_cache! : clear_cache!(key.to_sym)
       end
     end
 
@@ -60,7 +60,7 @@ module EHelpersTest__Cache
     expect(a) == b
 
     Should 'clear cache' do
-      get :index, :__update_cache__ => '*'
+      get :index, :__clear_cache__ => '*'
 
       r = get :heavy_io
       expect(r.status) == 200
@@ -75,7 +75,7 @@ module EHelpersTest__Cache
 
       banners, items = 2.times.map { rand.to_s }
       Should 'clearing and setting cache' do
-        get :__update_cache__ => '*'
+        get :__clear_cache__ => '*'
 
         render = get :heavy_render, :banners => banners, :items => items
         expect(render.status) == 200
@@ -92,14 +92,14 @@ module EHelpersTest__Cache
 
       new_banners, new_items = 2.times.map { rand.to_s }
       Context 'updating banners' do
-        get :__update_cache__ => :banners
+        get :__clear_cache__ => :banners
 
         r = get :heavy_render, :banners => new_banners, :items => rand.to_s
         expect(r.body) == [new_banners, items].join('/')
       end
 
       Context 'updating items' do
-        get :__update_cache__ => :items
+        get :__clear_cache__ => :items
 
         r = get :heavy_render, :banners => rand.to_s, :items => new_items
         expect(r.body) == [new_banners, new_items].join('/')

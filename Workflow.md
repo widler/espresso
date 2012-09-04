@@ -1077,7 +1077,7 @@ accept_ranges? 'bytes'
 
 Allow to cache the result of an arbitrary block and use the result on consequent requests.
 
-Cache can be updated by calling `update_cache!` method.
+Cache can be cleared by calling `clear_cache!` method.
 
 If called without params, all cache will be updated.
 
@@ -1106,12 +1106,12 @@ class App < E
 
   after do
       if 'some condition occurred'
-          # updating cache only for @banners and @db_items
-          update_cache! :banners, :db_items
+          # clearing cache only for @banners and @db_items
+          clear_cache! :banners, :db_items
       end
       if 'some another condition occurred'
-          # updating all cache
-          update_cache!
+          # clearing all cache
+          clear_cache!
       end
   end
 end

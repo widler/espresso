@@ -43,12 +43,12 @@ class E
   #
   #      before do
   #        if 'some condition occurred'
-  #          # updating cache only for @banners and @db_items
-  #          update_cache! :banners, :db_items
+  #          # clearing cache only for @banners and @db_items
+  #          clear_cache! :banners, :db_items
   #        end
   #        if 'some another condition occurred'
-  #          # updating all cache
-  #          update_cache!
+  #          # clearing all cache
+  #          clear_cache!
   #        end
   #      end
   #    end
@@ -70,7 +70,7 @@ class E
   #    end
   #  end
   #
-  def update_cache! *keys
+  def clear_cache! *keys
     __e__.sync do
       keys.size == 0 ?
           cache_pool.clear :

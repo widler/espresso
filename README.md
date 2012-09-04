@@ -405,4 +405,4 @@ simply put them inside `cache` block.
 
 The result will be cached and returned on consequent requests.
 
-To update cache, simply call `update_cache!`
+To clear cache, simply call `clear_cache!`
