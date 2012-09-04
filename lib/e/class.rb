@@ -289,20 +289,22 @@ class << E
     def add_restriction keep_existing, type, opts = {}, &proc
       return if locked? || proc.nil?
       @http__restrictions ||= {}
+      args = []
       case type
         when :basic
           cls = ::Rack::Auth::Basic
-          opts[:realm] ||= 'AccessRestricted'
+          args << (opts[:realm] || 'AccessRestricted')
         when :digest
           cls = ::Rack::Auth::Digest::MD5
           opts[:realm] ||= 'AccessRestricted'
           opts[:opaque] ||= opts[:realm]
+          args = [opts]
         else
           raise 'wrong auth type: %s' % type.inspect
       end
       setup__actions.each do |a|
         next if @http__restrictions[a] && keep_existing
-        @http__restrictions[a] = [cls, opts, proc]
+        @http__restrictions[a] = [cls, args, proc]
       end
     end
   end

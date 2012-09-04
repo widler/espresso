@@ -6,8 +6,8 @@ class E
   # overriding Appetite's action invocation
   def action__invoke &proc
     if (restriction = self.class.restrictions?(action_with_format))
-      auth_class, auth_opts, auth_proc = restriction
-      (auth_request = auth_class.new(proc {}, auth_opts, &auth_proc).call(env)) && halt(auth_request)
+      auth_class, auth_args, auth_proc = restriction
+      (auth_request = auth_class.new(proc {}, *auth_args, &auth_proc).call(env)) && halt(auth_request)
     end
 
     (cache_control = cache_control?) && cache_control!(*cache_control)
