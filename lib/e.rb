@@ -1,14 +1,13 @@
-require 'rubygems'
-require 'thread'
-require 'monitor'
 require 'digest'
 require 'cgi'
 require 'erb'
+
+require 'rubygems'
 require 'tilt'
 require 'appetite'
 
 class E < Appetite
-
+  
 end
 
 class Module

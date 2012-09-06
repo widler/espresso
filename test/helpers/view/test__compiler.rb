@@ -31,6 +31,51 @@ module EViewTest__Compiler
       end
     end
 
+    def clear_compiler_like_array
+      compiler_key = ['clear' ,'compiler' ,'like' ,'array']
+      
+      # pushing to pool
+      render_partial :clear_compiler_test, '' => compiler_key
+
+      if keys = params[:keys]
+        # clearing pool
+        clear_compiler_like! keys
+      end
+
+      compiler_pool.keys.select { |k| k.first == compiler_key }.size > 0
+    end
+
+    def clear_compiler_like_regexp
+      compiler_key = 'clear_compiler_like_regexp'
+      
+      # pushing to pool
+      render_partial :clear_compiler_test, '' => compiler_key
+
+      if key = params[:key]
+        # clearing pool
+        clear_compiler_like! /#{key}/
+      end
+
+      compiler_pool.keys.select { |k| k.first == compiler_key }.size > 0
+    end
+
+
+    def clear_compiler_if
+      compiler_key = 'clear_compiler_if'
+      
+      # pushing to pool
+      render_partial :clear_compiler_test, '' => compiler_key
+
+      if key = params[:key]
+        # clearing pool
+        clear_compiler_if! do |k|
+          k.is_a?(String) && k =~ /#{key}/
+        end
+      end
+
+      compiler_pool.keys.select { |k| k.first == compiler_key }.size > 0
+    end
+
   end
 
   Spec.new App do
@@ -79,6 +124,84 @@ module EViewTest__Compiler
       Should 'clear compiler and raise an error on render' do
         get :threaded, file, :__clear_compiler__ => '*'
         expect { get :threaded, file }.raise_error
+      end
+    end
+
+    Should 'clear by given array' do
+      get :clear_compiler_like_array
+      expect(last_response.body) == 'true'
+            
+      [
+        ['clear' ],
+        ['clear' ,'compiler'],
+        ['clear' ,'compiler' ,'like' ],
+        ['clear' ,'compiler' ,'like' ,'array'],
+      ].each do |keys|
+        get :clear_compiler_like_array, :keys => keys
+        expect(last_response.body) == 'false'
+      end
+
+      [
+        ['clear', 'blah'],
+        ['clear' ,'compiler' ,'like', 'blah'],
+        ['clear' ,'compiler' ,'like' ,'array', 'yo'],
+      ].each do |keys|
+        get :clear_compiler_like_array, :keys => keys
+        expect(last_response.body) == 'true'
+      end
+    end
+
+    Should 'clear by given regexp' do
+
+      get :clear_compiler_like_regexp
+      expect(last_response.body) == 'true'
+
+      [
+        'clear',
+        'compiler',
+        'like',
+        'regexp',
+        'clear_compiler',
+        'clear_compiler_like',
+        'clear_compiler_like_regexp',
+      ].each do |key|
+        get :clear_compiler_like_regexp, :key => key
+        expect(last_response.body) == 'false'
+      end
+      
+      [
+        'compiler_clear',
+        'like_clear_compiler',
+        'regexp_like_clear_compiler',
+      ].each do |key|
+        get :clear_compiler_like_regexp, :key => key
+        expect(last_response.body) == 'true'
+      end
+    end
+
+    Should 'clear by given proc' do
+
+      get :clear_compiler_if
+      expect(last_response.body) == 'true'
+
+      [
+        'clear',
+        'compiler',
+        'if',
+        'clear_compiler',
+        'clear_compiler_if',
+      ].each do |key|
+        get :clear_compiler_if, :key => key
+        expect(last_response.body) == 'false'
+      end
+      
+      [
+        'compiler_clear',
+        'if_clear_compiler',
+        'regexp_like_clear_compiler',
+      ].each do |key|
+        get :clear_compiler_if, :key => key
+        expect(last_response.body) == 'true'
       end
     end
 

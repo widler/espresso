@@ -633,7 +633,6 @@ class E
 
   class EspressoFrameworkInstanceVariables
 
-    include ::MonitorMixin
     include ::Rack::Utils
 
     attr_accessor :response,
@@ -642,7 +641,6 @@ class E
                   :explicit_charset
 
     def initialize ctrl
-      super()
       @ctrl = ctrl
     end
 
@@ -783,11 +781,6 @@ class E
       (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
         f << '%s="%s"' % [k, @ctrl.escape_html(opts[k])]
       end.join(' ')
-    end
-
-    def sync
-      return yield if Thread.current == Thread.main
-      synchronize { yield }
     end
 
   end

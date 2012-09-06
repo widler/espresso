@@ -315,10 +315,59 @@ class E
   # @note using of non-unique keys will lead to templates clashing
   #
   def clear_compiler! *keys
-    __e__.sync do
-      keys.size == 0 ?
-          compiler_pool.clear :
-          keys.each { |key| compiler_pool.delete_if { |k, v| k.first == key } }
+    keys.size == 0 ?
+        compiler_pool.clear :
+        keys.each do |key|
+          compiler_pool.keys.each { |k| k.first == key && compiler_pool.delete(k) }
+        end
+  end
+
+  # clear compiler of keys that matching given regexp(s) or array(s).
+  # if regexp given it will search only for string keys.
+  # if array given it will search only for array keys.
+  def clear_compiler_like! *keys
+    keys.each do |key|
+      if key.is_a? Array
+        compiler_pool.keys.each do |k|
+          ekey = k.first
+          ekey.is_a?(Array) &&
+            ekey.size >= key.size &&
+            ekey.slice(0, key.size) == key &&
+            compiler_pool.delete(k)
+        end
+      elsif key.is_a? Regexp
+        compiler_pool.keys.each do |k|
+          ekey = k.first
+          ekey.is_a?(String) && ekey =~ key && compiler_pool.delete(k)
+        end
+      else
+        raise "#%s only accepts arrays and regexps" % __method__
+      end
+    end
+  end
+
+  # clear cache only if given proc returns true.
+  # def index
+  #   # ...
+  #   @procedures = cache [user, :procedures] do
+  #     # ...
+  #   end
+  #   @actions = cache [user, :actions] do
+  #     # ...
+  #   end
+  #   render
+  # end
+  #
+  # private
+  # def clear_user_cache
+  #   clear_compiler_if! do |k|
+  #     k.first == user
+  #   end
+  # end
+  #
+  def clear_compiler_if! &proc
+    compiler_pool.keys.each do |k|
+      proc.call(k.first) && compiler_pool.delete(k)
     end
   end
 
@@ -344,9 +393,7 @@ class E
 
   def __e__engine_instance compiler_key, engine, *args, &proc
     return engine.new(*args, &proc) unless compiler_key
-    key = [compiler_key, engine, args, proc]
-    compiler_pool[key] ||
-        __e__.sync { compiler_pool[key] = engine.new(*args, &proc) }
+    compiler_pool[ [compiler_key, engine, args, proc] ] ||= engine.new(*args, &proc)
   end
 
   def __e__template controller, action_or_template, ext = nil

@@ -24,12 +24,12 @@ class E
   if ::AppetiteConstants::RESPOND_TO__SOURCE_LOCATION # ruby1.9
     def cache key = nil, &proc
       key ||= proc.source_location
-      cache_pool[key] || __e__.sync { cache_pool[key] = proc.call }
+      cache_pool[key] ||= proc.call
     end
   else # ruby1.8
     def cache key = nil, &proc
       key ||= proc.to_s.split('@').last
-      cache_pool[key] || __e__.sync { cache_pool[key] = proc.call }
+      cache_pool[key] ||= proc.call
     end
   end
 
@@ -71,31 +71,27 @@ class E
   #  end
   #
   def clear_cache! *keys
-    __e__.sync do
-      keys.size == 0 ?
-          cache_pool.clear :
-          keys.each { |key| cache_pool.delete(key) }
-    end
+    keys.size == 0 ?
+        cache_pool.clear :
+        keys.each { |key| cache_pool.delete key }
   end
 
   # clear cache that's matching given regexp(s) or array(s).
   # if regexp given it will search only for string keys.
   # if array given it will search only for array keys.
   def clear_cache_like! *keys
-    __e__.sync do
-      keys.each do |key|
-        if key.is_a? Array
-          cache_pool.keys.each do |k|
-            k.is_a?(Array) &&
-              k.size >= key.size &&
-              k.slice(0, key.size) == key &&
-              cache_pool.delete(k)
-          end
-        elsif key.is_a? Regexp
-          cache_pool.keys.each { |k| k.is_a?(String) && k =~ key && cache_pool.delete(k) }
-        else
-          raise "#%s only accepts arrays and regexps" % __method__
+    keys.each do |key|
+      if key.is_a? Array
+        cache_pool.keys.each do |k|
+          k.is_a?(Array) &&
+            k.size >= key.size &&
+            k.slice(0, key.size) == key &&
+            cache_pool.delete(k)
         end
+      elsif key.is_a? Regexp
+        cache_pool.keys.each { |k| k.is_a?(String) && k =~ key && cache_pool.delete(k) }
+      else
+        raise "#%s only accepts arrays and regexps" % __method__
       end
     end
   end
@@ -120,8 +116,6 @@ class E
   # end
   #
   def clear_cache_if! &proc
-    __e__.sync do
-      cache_pool.keys.each { |k| proc.call(k) && cache_pool.delete(k) }
-    end
+    cache_pool.keys.each { |k| proc.call(k) && cache_pool.delete(k) }
   end
 end
