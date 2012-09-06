@@ -77,4 +77,51 @@ class E
           keys.each { |key| cache_pool.delete(key) }
     end
   end
+
+  # clear cache that's matching given regexp(s) or array(s).
+  # if regexp given it will search only for string keys.
+  # if array given it will search only for array keys.
+  def clear_cache_like! *keys
+    __e__.sync do
+      keys.each do |key|
+        if key.is_a? Array
+          cache_pool.keys.each do |k|
+            k.is_a?(Array) &&
+              k.size >= key.size &&
+              k.slice(0, key.size) == key &&
+              cache_pool.delete(k)
+          end
+        elsif key.is_a? Regexp
+          cache_pool.keys.each { |k| k.is_a?(String) && k =~ key && cache_pool.delete(k) }
+        else
+          raise "#%s only accepts arrays and regexps" % __method__
+        end
+      end
+    end
+  end
+
+  # clear cache only if given proc returns true.
+  # def index
+  #   # ...
+  #   @procedures = cache [user, :procedures] do
+  #     # ...
+  #   end
+  #   @actions = cache [user, :actions] do
+  #     # ...
+  #   end
+  #   render
+  # end
+  #
+  # private
+  # def clear_user_cache
+  #   clear_cache_if! do |k|
+  #     k.first == user
+  #   end
+  # end
+  #
+  def clear_cache_if! &proc
+    __e__.sync do
+      cache_pool.keys.each { |k| proc.call(k) && cache_pool.delete(k) }
+    end
+  end
 end

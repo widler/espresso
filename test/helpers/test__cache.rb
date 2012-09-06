@@ -28,6 +28,45 @@ module EHelpersTest__Cache
       [banners, items].join '/'
     end
 
+    def clear_cache_like_array
+      updated = false
+      if keys = params[:keys]
+        clear_cache_like! keys
+      end
+      cache ['clear' ,'cache' ,'like' ,'array'] do
+        updated = true
+      end
+      updated
+    end
+
+    def clear_cache_like_regexp
+      updated = false
+      if key = params[:key]
+        clear_cache_like! /#{key}/
+      end
+      cache 'clear_cache_like_regexp' do
+        updated = true
+      end
+      updated
+    end
+
+    def clear_cache_if
+      updated = false
+      case params[:test]
+        when 'array'
+          clear_cache_if! { |k| k.is_a?(Array) && k.include?(params[:key]) }
+        when 'match'
+          clear_cache_if! { |k| k.is_a?(String) && k =~ /#{params[:key]}/ }
+      end
+      cache 'clear_cache_if' do
+        updated = true
+      end
+      cache ['a', 'b', 'c'] do
+        updated = true
+      end
+      updated
+    end
+
     private
     def content
       ::Digest::MD5.hexdigest rand(1024**1024).to_s
@@ -106,5 +145,91 @@ module EHelpersTest__Cache
       end
     end
 
+    Should 'clear by given proc' do
+      get :clear_cache_if
+      expect(last_response.body) == 'true'
+      get :clear_cache_if
+      expect(last_response.body) == 'false'
+
+      %w[a b c].each do |key|
+        get :clear_cache_if, :test => 'array', :key => key
+        expect(last_response.body) == 'true'
+      end
+
+      %w[d e f].each do |key|
+        get :clear_cache_if, :test => 'array', :key => key
+        expect(last_response.body) == 'false'
+      end
+
+      %w[clear cache if].each do |key|
+        get :clear_cache_if, :test => 'match', :key => key
+        expect(last_response.body) == 'true'
+      end
+
+      get :clear_cache_if, :test => 'match', :key => 'blah'
+      expect(last_response.body) == 'false'
+    end
+
+    Should 'clear by given array' do
+      get :clear_cache_like_array
+      expect(last_response.body) == 'true'
+      
+      get :clear_cache_like_array
+      expect(last_response.body) == 'false'
+
+      [
+        ['clear' ],
+        ['clear' ,'cache'],
+        ['clear' ,'cache' ,'like' ],
+        ['clear' ,'cache' ,'like' ,'array'],
+      ].each do |keys|
+        get :clear_cache_like_array, :keys => keys
+        expect(last_response.body) == 'true'
+      end
+
+      [
+        ['clear', 'blah'],
+        ['clear' ,'cache' ,'like', 'blah'],
+        ['clear' ,'cache' ,'like' ,'array', 'yo'],
+      ].each do |keys|
+        get :clear_cache_like_array, :keys => keys
+        expect(last_response.body) == 'false'
+      end
+    end
+
+    Should 'clear by given regexp' do
+
+      get :clear_cache_like_regexp
+      expect(last_response.body) == 'true'
+
+      get :clear_cache_like_regexp
+      expect(last_response.body) == 'false'
+
+      [
+        'clear',
+        'cache',
+        'like',
+        'regexp',
+        'clear_cache',
+        'clear_cache_like',
+        'clear_cache_like_regexp',
+      ].each do |key|
+        get :clear_cache_like_regexp, :key => key
+        expect(last_response.body) == 'true'
+      end
+      
+      [
+        'cache_clear',
+        'like_clear_cache',
+        'regexp_like_clear_cache',
+      ].each do |key|
+        get :clear_cache_like_regexp, :key => key
+        expect(last_response.body) == 'false'
+      end
+
+    end
+
   end
 end
+
+
