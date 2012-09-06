@@ -77,8 +77,8 @@ class E
   end
 
   # clear cache that's matching given regexp(s) or array(s).
-  # if regexp given it will search only for string keys.
-  # if array given it will search only for array keys.
+  # if regexp given it will match only String and Symbol keys.
+  # if array given it will match only Array keys.
   def clear_cache_like! *keys
     keys.each do |key|
       if key.is_a? Array
@@ -89,7 +89,12 @@ class E
             cache_pool.delete(k)
         end
       elsif key.is_a? Regexp
-        cache_pool.keys.each { |k| k.is_a?(String) && k =~ key && cache_pool.delete(k) }
+        cache_pool.keys.each do |k|
+          (
+            (k.is_a?(String) && k =~ key) ||
+            (k.is_a?(Symbol) && k.to_s =~ key) 
+          ) && cache_pool.delete(k)
+        end
       else
         raise "#%s only accepts arrays and regexps" % __method__
       end
@@ -111,7 +116,7 @@ class E
   # private
   # def clear_user_cache
   #   clear_cache_if! do |k|
-  #     k.first == user
+  #     k.is_a?(Array) && k.first == user
   #   end
   # end
   #

@@ -1079,9 +1079,9 @@ Allow to cache the result of an arbitrary block and use the result on consequent
 
 Cache can be cleared by calling `clear_cache!` method.
 
-If called without params, all cache will be updated.
+If called without params, all cache will be cleared.
 
-To update only specific blocks, pass their names as params.
+To clear only specific blocks, pass their IDs as params.
 
 **Example:**
 
@@ -1114,6 +1114,61 @@ class App < E
           clear_cache!
       end
   end
+end
+```
+
+By using `clear_cache_like!` is also possible to clear only keys that match a regexp or an array.
+
+```ruby
+def index
+    # ...
+    @procedures = cache [user, :procedures] do
+      # ...
+    end
+    @actions = cache [user, :actions] do
+      # ...
+    end
+    @banners = cache :user_banners do
+      # ...
+    end
+    render
+end
+
+private
+def clear_user_cache
+
+    # clearing [user, :procedures] and [user, :actions] cache
+    clear_cache_like! [user]
+
+    # clearing any cache starting with 'user'
+    clear_cache_like! /\Auser_/
+
+end
+```
+
+
+Or clear by a given proc via `clear_cache_if!`.<br/>
+The proc will receive the key to match as first argument:
+
+```ruby
+def index
+    # ...
+    @procedures = cache [user, :procedures] do
+      # ...
+    end
+    @actions = cache [user, :actions] do
+      # ...
+    end
+    render
+end
+
+private
+def clear_user_cache
+
+    # clearing [user, :procedures] and [user, :actions] cache
+    clear_cache_if! do |k|
+      k.is_a?(Array) && k.first == user
+    end
 end
 ```
 

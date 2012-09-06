@@ -323,8 +323,8 @@ class E
   end
 
   # clear compiler of keys that matching given regexp(s) or array(s).
-  # if regexp given it will search only for string keys.
-  # if array given it will search only for array keys.
+  # if regexp given it will match only String and Symbol keys.
+  # if array given it will match only Array keys.
   def clear_compiler_like! *keys
     keys.each do |key|
       if key.is_a? Array
@@ -338,7 +338,10 @@ class E
       elsif key.is_a? Regexp
         compiler_pool.keys.each do |k|
           ekey = k.first
-          ekey.is_a?(String) && ekey =~ key && compiler_pool.delete(k)
+          (
+            (ekey.is_a?(String) && ekey =~ key) ||
+            (ekey.is_a?(Symbol) && ekey.to_s =~ key)
+          ) && compiler_pool.delete(k)
         end
       else
         raise "#%s only accepts arrays and regexps" % __method__
@@ -346,25 +349,7 @@ class E
     end
   end
 
-  # clear cache only if given proc returns true.
-  # def index
-  #   # ...
-  #   @procedures = cache [user, :procedures] do
-  #     # ...
-  #   end
-  #   @actions = cache [user, :actions] do
-  #     # ...
-  #   end
-  #   render
-  # end
-  #
-  # private
-  # def clear_user_cache
-  #   clear_compiler_if! do |k|
-  #     k.first == user
-  #   end
-  # end
-  #
+  # see (#clear_cache_if!)
   def clear_compiler_if! &proc
     compiler_pool.keys.each do |k|
       proc.call(k.first) && compiler_pool.delete(k)

@@ -397,11 +397,12 @@ render_haml_l      # will render only the layout of current action using Haml en
 
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+
 ## Templates Compilation
 
 
 For most web sites, most time are spent at templates rendering.<br/>
-When rendering templates, most time are spent at reading and compiling.
+When rendering templates, most time are spent at files reading and templates compilation.
 
 You can skip these expensive operations by using built-in compiler.
 
@@ -425,9 +426,9 @@ render_file 'some/file', Object.new, '' => true
 render_haml "path/to/file", '' => "path/to/file"
 ```
 
-To update compiled templates call `clear_compiler!`.<br/>
-If called without arguments, it will update all templates.<br/>
-To update only some templates, pass their unique IDs as arguments.
+To clear compiled templates call `clear_compiler!`.<br/>
+If called without arguments, it will clear all templates.<br/>
+To clear only some templates, pass their unique IDs as arguments.
 
 **Example:**
 
@@ -446,11 +447,58 @@ class App < E
             clear_compiler! :banners, :ads
         end
         if 'some another condition occurred'
-            # update all templates
+            # clear all templates
             clear_compiler!
         end
     end
 end
 ```
 
+By using `clear_compiler_like!` you can clear only keys that match a given regexp or even array.
+
+```ruby
+def index
+    @procedures = render :procedures,      '' => [user, :procedures]
+    @actions    = render :actions,         '' => [user, :actions]
+    @banners    = render_partial :banners, '' => :user_banners
+    render
+end
+
+private
+def clear_compiled_templates
+
+    # clearing [user, :procedures] and [user, :actions]
+    clear_compiler_like! [user]
+
+    # clearing any templates starting with 'user'
+    clear_compiler_like! /\Auser_/
+
+end
+```
+
+It is also possible to clear compiler by a given proc, via `clear_compiler_if!`.<br/>
+The proc will receive the key to match as first argument:
+
+```ruby
+def index
+    @procedures = render :procedures,      '' => [user, :procedures]
+    @actions    = render :actions,         '' => [user, :actions]
+    @banners    = render_partial :banners, '' => :user_banners
+    render
+end
+
+private
+def clear_compiled_templates
+
+    # clearing [user, :procedures] and [user, :actions]
+    clear_compiler_if! do |k|
+      k.is_a?(Array) && k.first == user
+    end
+end
+```
+
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
+
+
+
