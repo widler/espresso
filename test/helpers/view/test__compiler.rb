@@ -3,15 +3,15 @@ module EViewTest__Compiler
     map '/'
 
     before do
-      if key = params[:__update_compiler__]
-        key == '*' ? update_compiler! : update_compiler!(key)
+      if key = params[:__clear_compiler__]
+        key == '*' ? clear_compiler! : clear_compiler!(key)
       end
     end
 
     layout :layout
 
     def index file
-      unless params[:__update_compiler__]
+      unless params[:__clear_compiler__]
         render '' => true do
           render_partial file, '' => file
         end
@@ -19,7 +19,7 @@ module EViewTest__Compiler
     end
 
     def threaded file
-      unless params[:__update_compiler__]
+      unless params[:__clear_compiler__]
 
         o = nil
         Thread.new do
@@ -57,7 +57,7 @@ module EViewTest__Compiler
     end
 
     Should 'clear compiler and raise an error on render' do
-      get file, :__update_compiler__ => '*'
+      get file, :__clear_compiler__ => '*'
       expect { get file }.raise_error
     end
 
@@ -77,7 +77,7 @@ module EViewTest__Compiler
       end
 
       Should 'clear compiler and raise an error on render' do
-        get :threaded, file, :__update_compiler__ => '*'
+        get :threaded, file, :__clear_compiler__ => '*'
         expect { get :threaded, file }.raise_error
       end
     end

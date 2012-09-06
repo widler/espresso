@@ -288,7 +288,7 @@ class E
     self.class.compiler_pool?
   end
 
-  # call `update_compiler!` without args to update all compiled templates.
+  # call `clear_compiler!` without args to update all compiled templates.
   # to update only specific templates pass as arguments the IDs you used to enable compiler.
   #
   # @example
@@ -303,18 +303,18 @@ class E
   #      before do
   #        if 'some condition occurred'
   #          # updating only @banners and @ads
-  #          update_compiler! :banners, :ads
+  #          clear_compiler! :banners, :ads
   #        end
   #        if 'some another condition occurred'
   #          # update all templates
-  #          update_compiler!
+  #          clear_compiler!
   #        end
   #      end
   #    end
   #
   # @note using of non-unique keys will lead to templates clashing
   #
-  def update_compiler! *keys
+  def clear_compiler! *keys
     __e__.sync do
       keys.size == 0 ?
           compiler_pool.clear :

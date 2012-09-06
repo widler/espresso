@@ -425,7 +425,7 @@ render_file 'some/file', Object.new, '' => true
 render_haml "path/to/file", '' => "path/to/file"
 ```
 
-To update compiled templates call `update_compiler!`.<br/>
+To update compiled templates call `clear_compiler!`.<br/>
 If called without arguments, it will update all templates.<br/>
 To update only some templates, pass their unique IDs as arguments.
 
@@ -443,11 +443,11 @@ class App < E
     before do
         if 'some condition occurred'
             # updating only @banners and @ads
-            update_compiler! :banners, :ads
+            clear_compiler! :banners, :ads
         end
         if 'some another condition occurred'
             # update all templates
-            update_compiler!
+            clear_compiler!
         end
     end
 end
