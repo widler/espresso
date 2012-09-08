@@ -188,11 +188,12 @@ class << E
   # meant it responds to `[]=`, `[]`, `delete`, `delete_if` and `clear` methods.
   # also, the pool SHOULD accept ARRAYS as keys.
   def compiler_pool pool
-    @compiler__pool || compiler_pool!(pool)
+    compiler_pool! pool, true
   end
 
-  def compiler_pool! pool
+  def compiler_pool! pool, keep_existing = nil
     return if locked?
+    return if @compiler__pool && keep_existing
     @compiler__pool = pool
   end
 

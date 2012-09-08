@@ -6,11 +6,12 @@ class << E
   # make sure your pool behaves just like a Hash,
   # meant it responds to `[]=`, `[]`, `delete` and `clear`
   def cache_pool pool
-    @cache__pool || cache_pool!(pool)
+    cache_pool! pool, true
   end
 
-  def cache_pool! pool
+  def cache_pool! pool, keep_existing = nil
     return if locked?
+    return if @cache__pool && keep_existing
     @cache__pool = pool
   end
 
