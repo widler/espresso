@@ -103,7 +103,6 @@ class EApp
       @assets_fullpath
     end
 
-
   end
 
   class AssetsHelper
@@ -126,31 +125,49 @@ class EApp
     # the change will be reflected in all controllers
     #
     # @example Slim engine
-    # doctype 5
-    #   head
-    #   
-    #     - assets.chdir :vendor
-    #     == script_tag 'jquery.js'
-    #   
-    #     - assets.chdir :bootstrap
-    #     == script_tag 'js/bootstrap.min.js'
-    #     == style_tag  'css/bootstrap.min.css'
-    #     == style_tag  'css/bootstrap-responsive.min.css'
     #
-    #     - assets.chdir '../google-code-prettify'
-    #     == script_tag 'prettify.js'
-    #     == style_tag  'tomorrow-night-eighties.css'
+    # - assets.chdir 'vendor'
+    # == script_tag 'jquery.js'
     #
-    #     - assets.chdir '../noty'
-    #     == script_tag 'jquery.noty.js'
-    #     == script_tag 'layouts/top.js'
-    #     == script_tag 'layouts/topRight.js'
-    #     == script_tag 'themes/default.js'
+    # - assets.chdir :bootstrap
+    # == script_tag 'js/bootstrap.min.js'
+    # == style_tag  'css/bootstrap.min.css'
+    # == style_tag  'css/bootstrap-responsive.min.css'
     #
-    #     - assets.chdir '/'
-    #     == script_tag 'master.js'
-    #     == script_tag 'e-crudify-bootstrap.js'
-    #     == style_tag  'master.css'
+    # - assets.chdir '../google-code-prettify'
+    # == script_tag 'prettify.js'
+    # == style_tag  'tomorrow-night-eighties.css'
+    #
+    # - assets.chdir '../noty'
+    # == script_tag 'jquery.noty.js'
+    # == script_tag 'layouts/top.js'
+    # == script_tag 'layouts/topRight.js'
+    # == script_tag 'themes/default.js'
+    #
+    # - assets.chdir '/'
+    # == script_tag 'master.js'
+    # == script_tag 'e-crudify-bootstrap.js'
+    # == style_tag  'master.css'
+    #
+    # will result in:
+    #
+    # <script src="/vendor/jquery.js" type="text/javascript"></script>
+    #
+    # <script src="/vendor/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    # <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    # <link href="/vendor/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
+    #
+    # <script src="/vendor/google-code-prettify/prettify.js" type="text/javascript"></script>
+    # <link href="/vendor/google-code-prettify/tomorrow-night-eighties.css" rel="stylesheet" />
+    #
+    # <script src="/vendor/noty/jquery.noty.js" type="text/javascript"></script>
+    # <script src="/vendor/noty/layouts/top.js" type="text/javascript"></script>
+    # <script src="/vendor/noty/layouts/topRight.js" type="text/javascript"></script>
+    # <script src="/vendor/noty/themes/default.js" type="text/javascript"></script>
+    #
+    # <script src="/master.js" type="text/javascript"></script>
+    # <script src="/e-crudify-bootstrap.js" type="text/javascript"></script>
+    # <link href="/master.css" rel="stylesheet" />
     #
     def chdir path
       path = path.to_s

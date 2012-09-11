@@ -268,15 +268,6 @@ class EApp
   end
   alias setup setup_controllers
 
-  def lock!
-    @locked = true
-    self
-  end
-
-  def locked?
-    @locked
-  end
-
   # displays URLs the app will respond to,
   # with controller and action that serving each URL.
   def url_map opts = {}
@@ -354,7 +345,7 @@ class EApp
         end
       end
       ctrl.freeze!
-      ctrl.lock! if locked?
+      ctrl.lock!
     end
     rewrite_rules.size > 0 ?
         ::AppetiteRewriter.new(rewrite_rules, builder.to_app) :

@@ -311,6 +311,7 @@ class << E
   include EspressoFrameworkCoreSetup
 
   def mount *roots, &setup
+    return app if app
     locked? && raise(SecurityError, 'App was previously locked, so you can not remount it or change any setup.')
     ::EApp.new.mount self, *roots, &setup
   end

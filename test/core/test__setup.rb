@@ -201,7 +201,7 @@ module ECoreTest__Setup
   end
 
   Spec.new self do
-    app LockTest.mount.lock!
+    app LockTest.mount
     map LockTest.base_url
     get
 
