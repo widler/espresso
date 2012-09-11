@@ -348,7 +348,7 @@ class EApp
           run lambda { |env| ctrl.new(nil, rest_map).call env }
         end
       end
-      if assets_url = assets_url()
+      if assets_server?
         builder.map assets_url do
           run lambda { |e| ::Rack::Directory.new(app.assets_fullpath || app.assets_path).call(e) }
         end

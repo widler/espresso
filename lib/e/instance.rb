@@ -777,12 +777,6 @@ class E
       end.new @ctrl
     end
 
-    def assets__opts_to_s opts
-      (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
-        f << '%s="%s"' % [k, @ctrl.escape_html(opts[k])]
-      end.join(' ')
-    end
-
   end
 
 end

@@ -47,10 +47,8 @@ namespace :test do
     session.boot { include Sonar }
     session.before do |app|
       if app && ::AppetiteUtils.is_app?(app)
-        app.use Rack::Lint
+        map app.base_url
         app(app)
-        map(app.base_url)
-        get
       end
     end
     session.run /EHelpersTest/, :trace => true
