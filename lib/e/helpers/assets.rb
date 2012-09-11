@@ -103,37 +103,55 @@ class EApp
       @assets_fullpath
     end
 
-  end
-end
 
-class E
-
-  class EspressoFrameworkInstanceVariables
-
-    attr_accessor :assets_proxy
-
-    def assets__opts_to_s opts
-      (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
-        f << '%s="%s"' % [k, @ctrl.escape_html(opts[k])]
-      end.join(' ')
-    end
   end
 
-  class EspressoFrameworkAssetsProxy
+  class AssetsHelper
 
-    def initialize ctrl
-      @ctrl = ctrl
-      @wd   = ''.freeze
+    def initialize app
+      @app = app
+      @wd  = ''.freeze
     end
 
     def path
-      (fullpath = @ctrl.app.assets_fullpath) ? fullpath : @ctrl.app.assets_path
+      (fullpath = @app.assets_fullpath) ? fullpath : @app.assets_path
     end
 
     def url path = nil
-      '' << @ctrl.app.assets_url << @wd << (path||'')
+      '' << @app.assets_url << @wd << (path||'')
     end
 
+    # please note that all controllers share same assets instance,
+    # so if you do `assets.chdir` in one controller 
+    # the change will be reflected in all controllers
+    #
+    # @example Slim engine
+    # doctype 5
+    #   head
+    #   
+    #     - assets.chdir :vendor
+    #     == script_tag 'jquery.js'
+    #   
+    #     - assets.chdir :bootstrap
+    #     == script_tag 'js/bootstrap.min.js'
+    #     == style_tag  'css/bootstrap.min.css'
+    #     == style_tag  'css/bootstrap-responsive.min.css'
+    #
+    #     - assets.chdir '../google-code-prettify'
+    #     == script_tag 'prettify.js'
+    #     == style_tag  'tomorrow-night-eighties.css'
+    #
+    #     - assets.chdir '../noty'
+    #     == script_tag 'jquery.noty.js'
+    #     == script_tag 'layouts/top.js'
+    #     == script_tag 'layouts/topRight.js'
+    #     == script_tag 'themes/default.js'
+    #
+    #     - assets.chdir '/'
+    #     == script_tag 'master.js'
+    #     == script_tag 'e-crudify-bootstrap.js'
+    #     == style_tag  'master.css'
+    #
     def chdir path
       path = path.to_s
       return @wd = '' if path == '/'
@@ -145,10 +163,23 @@ class E
       end
       @wd = (wd.size > 0 ? wd.reject { |c| c.empty? }.join('/') << '/' : '').freeze
     end
+
+    def opts_to_s opts
+      (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
+        f << '%s="%s"' % [k, ::CGI.escapeHTML(opts[k])]
+      end.join(' ')
+    end
   end
 
   def assets
-    __e__.assets_proxy ||= EspressoFrameworkAssetsProxy.new(self.class)
+    @assets_helper ||= AssetsHelper.new(self)
+  end
+end
+
+class E
+
+  def assets
+    self.class.app.assets
   end
 
   def image_tag src = nil, opts = {}
@@ -158,7 +189,7 @@ class E
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
     "<img src=\"%s\" %s />\n" % [
         opted_src ? opted_src : assets.url(src),
-        __e__.assets__opts_to_s(opts)
+        assets.opts_to_s(opts)
       ]
   end
 
@@ -168,13 +199,13 @@ class E
     src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     opts[:type] ||= 'text/javascript'
     if proc
-      "<script %s>\n%s\n</script>\n" % [__e__.assets__opts_to_s(opts), proc.call]
+      "<script %s>\n%s\n</script>\n" % [assets.opts_to_s(opts), proc.call]
     else
       opted_src = opts.delete(:src)
       src ||= opted_src || raise('Please provide script URL as first argument or via :src option')
       "<script src=\"%s\" %s></script>\n" % [
           opted_src ? opted_src : assets.url(src),
-          __e__.assets__opts_to_s(opts)
+          assets.opts_to_s(opts)
         ]
     end
   end
@@ -183,14 +214,14 @@ class E
     src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     if proc
       opts[:type] ||= 'text/css'
-      "<style %s>\n%s\n</style>\n" % [__e__.assets__opts_to_s(opts), proc.call]
+      "<style %s>\n%s\n</style>\n" % [assets.opts_to_s(opts), proc.call]
     else
       opts[:rel] = 'stylesheet'
       opted_src = opts.delete(:href) || opts.delete(:src)
       src ||= opted_src || raise('Please URL as first argument or :href option')
       "<link href=\"%s\" %s />\n" % [
           opted_src ? opted_src : assets.url(src),
-          __e__.assets__opts_to_s(opts)
+          assets.opts_to_s(opts)
         ]
     end
   end
