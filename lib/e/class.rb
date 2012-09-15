@@ -24,19 +24,24 @@ class << E
     #      end
     #
     # @param [Proc] proc
-    def before &proc
-      add_hook :a, &proc
+    def before opts = {}, &proc
+      add_hook :a, opts, &proc
     end
 
     # (see #before)
-    def after &proc
-      add_hook :z, &proc
+    def after opts = {}, &proc
+      add_hook :z, opts, &proc
     end
 
     def hooks? position, action = nil
-      (@http__hooks ||= {})[position] ||= {}
-      (@http__hooks[position][:*] || []) +
-          (@http__hooks[position][action] || [])
+      initialize_hooks position
+      @hooks_ordered[[position,action]] ||= ((@hooks[position][:*] || []) +
+          (@hooks[position][action] || [])).sort do |a,b|
+        # sorting hooks in DESCENDING order,
+        # so the one having the biggest priority will run first
+        ((b.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i <=>
+            ((a.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i
+      end
     end
 
     # @example restricting all actions using Basic authorization:
@@ -99,10 +104,10 @@ class << E
     end
 
     def restrictions? action = nil
-      return unless @http__restrictions
+      return unless @restrictions
       action ?
-          @http__restrictions[action] || @http__restrictions[:*] :
-          @http__restrictions
+          @restrictions[action] || @restrictions[:*] :
+          @restrictions
     end
 
     # Content-Type to be returned by action(s). default is text/html
@@ -278,17 +283,23 @@ class << E
     end
 
     private
-    def add_hook position, &proc
+    def initialize_hooks position
+      (@hooks_ordered ||= {})
+      (@hooks ||= {})[position] ||= {}
+    end
+
+    def add_hook position, opts = {}, &proc
       return if locked? || proc.nil?
-      hooks? position
-      method = proc_to_method(:hooks, position, *setup__actions, &proc)
-      # actions can receive callbacks from slices even if there are ones set by controller
-      setup__actions.each { |a| (@http__hooks[position][a] ||= []) << method }
+      initialize_hooks position
+      method = proc_to_method(:hooks, :priority, opts[:priority].to_i, position, *setup__actions, &proc)
+      setup__actions.each do |a|
+        (@hooks[position][a] ||= []) << method
+      end
     end
 
     def add_restriction keep_existing, type, opts = {}, &proc
       return if locked? || proc.nil?
-      @http__restrictions ||= {}
+      @restrictions ||= {}
       args = []
       case type
         when :basic
@@ -303,8 +314,8 @@ class << E
           raise 'wrong auth type: %s' % type.inspect
       end
       setup__actions.each do |a|
-        next if @http__restrictions[a] && keep_existing
-        @http__restrictions[a] = [cls, args, proc]
+        next if @restrictions[a] && keep_existing
+        @restrictions[a] = [cls, args, proc]
       end
     end
   end

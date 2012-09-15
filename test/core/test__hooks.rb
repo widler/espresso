@@ -25,6 +25,13 @@ module ECoreTest__Hooks
       end
     end
 
+    setup :test_priority do
+      before { (@priority_test ||= []) << :c }
+      before(:priority => 100) { (@priority_test ||= []) << :a }
+      before(:priority => 50) { (@priority_test ||= []) << :b }
+      after(:priority => -100) { response.body = @priority_test.inspect }
+    end
+
     format :json
     setup 'index.json' do
       before { @hooks ||= 0; @hooks += 1 }
@@ -45,6 +52,9 @@ module ECoreTest__Hooks
 
     def get_params id
 
+    end
+
+    def test_priority
     end
 
   end
@@ -72,6 +82,11 @@ module ECoreTest__Hooks
       is?(last_response.body) == '4'
       get 'index.json'
       is?(last_response.body) == '3'
+    end
+
+    Testing :priority do
+      get :test_priority
+      expect(last_response.body) == [:a, :b, :c].inspect
     end
   end
 
