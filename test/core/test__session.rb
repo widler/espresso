@@ -2,6 +2,8 @@ module ECoreTest__Session
 
   class App < E
 
+    before { session['needed here to load session'] }
+
     setup :readonly_set_by_hook do
       before { session.readonly! }
     end
@@ -12,6 +14,14 @@ module ECoreTest__Session
 
     def get var
       session[var] || 'notSet'
+    end
+
+    def keys
+      session.keys.inspect
+    end
+
+    def values
+      session.values.inspect
     end
 
     def flash_set var, val
@@ -41,11 +51,21 @@ module ECoreTest__Session
     app EApp.new { session :memory }.mount(App)
     map App.route
 
-    var, val = rand.to_s, rand.to_s
+    var, val = 2.times.map { rand.to_s }
     get :set, var, val
 
-    r = get :get, var
-    expect(r.body) =~ /#{val}/
+    5.times do
+      r = get :get, var
+      expect(r.body) =~ /#{val}/
+    end
+
+    Testing 'keys/values' do
+      get :keys
+      expect(last_response.body) == [var].inspect
+
+      get :values
+      expect(last_response.body) == [val].inspect
+    end
 
     Test :readonly do
 

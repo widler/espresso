@@ -686,6 +686,10 @@ class E
           @readonly
         end
 
+        def method_missing *args
+          session.send *args
+        end
+
       end.new @ctrl.env['rack.session']
     end
 
@@ -773,6 +777,10 @@ class E
 
         def readonly?
           @readonly
+        end
+
+        def method_missing *args
+          controller.orig_cookies.send *args
         end
       end.new @ctrl
     end

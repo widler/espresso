@@ -14,6 +14,14 @@ module ECoreTest__Cookies
       cookies[var]
     end
 
+    def keys
+      cookies.keys.inspect
+    end
+
+    def values
+      cookies.values.inspect
+    end
+
     def readonly_set_by_hook var, val
       cookies[var] = val
     end
@@ -31,6 +39,14 @@ module ECoreTest__Cookies
       get :set, var, val
       r = get :get, var
       expect(r.body) =~ /#{val}/
+
+      Testing 'keys/values' do
+        get :keys
+        expect(last_response.body) == [var].inspect
+
+        get :values
+        expect(last_response.body) == [val].inspect
+      end
     end
 
     Test :readonly do
