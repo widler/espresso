@@ -8,9 +8,19 @@ class << E
     #       so, if there are N callbacks set by controller and M set by slice,
     #       N + M callbacks will be executed.
     #
+    # @note callbacks will be executed in the order was added.
+    #       to change the calling order, use :priority option.
+    #       the callback with highest priority will run first.
+    #
     # @example defining the callback, to be executed before all actions
     #      before do
     #        puts "will be executed before each action"
+    #      end
+    #
+    # @example  making sure this will run before any other hooks by setting priority to 1000,
+    #           (with condition there are no hooks with higher priority)
+    #      before :priority => 1000 do
+    #        # ...
     #      end
     #
     # @example defining the callback to be executed only before :index
@@ -35,13 +45,7 @@ class << E
 
     def hooks? position, action = nil
       initialize_hooks position
-      @hooks_ordered[[position,action]] ||= ((@hooks[position][:*] || []) +
-          (@hooks[position][action] || [])).sort do |a,b|
-        # sorting hooks in DESCENDING order,
-        # so the one having the biggest priority will run first
-        ((b.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i <=>
-            ((a.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i
-      end
+      @sorted_hooks[[position,action]] ||= sort_hooks(position, action)
     end
 
     # @example restricting all actions using Basic authorization:
@@ -284,8 +288,16 @@ class << E
 
     private
     def initialize_hooks position
-      (@hooks_ordered ||= {})
+      (@sorted_hooks ||= {})
       (@hooks ||= {})[position] ||= {}
+    end
+
+    # sorting hooks in DESCENDING order, so the ones with highest priority will run first
+    def sort_hooks position, action = nil
+      ((@hooks[position][:*] || []) + (@hooks[position][action] || [])).sort do |a,b|
+        ((b.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i <=>
+            ((a.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i
+      end
     end
 
     def add_hook position, opts = {}, &proc

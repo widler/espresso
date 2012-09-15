@@ -594,6 +594,18 @@ class App < E
 end
 ```
 
+Callbacks will be executed in the order was added.<br/>
+To change the calling order, use :priority option.<br/>
+The callback with highest priority will run first.
+
+ **Example:** - Making sure this will run before any other hooks by setting priority to 1000, (with condition there are no hooks with higher priority)
+
+```ruby
+    before :priority => 1000 do
+        # ...
+    end
+```
+
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
 ## Authorization
