@@ -22,16 +22,21 @@ end
 
 class E
 
-  if ::AppetiteConstants::RESPOND_TO__SOURCE_LOCATION # ruby1.9
-    def cache key = nil, &proc
-      key ||= proc.source_location
-      cache_pool[key] ||= proc.call
+  # simply running a block and store returned value.
+  # on next request the stored value will be returned.
+  # 
+  # @note
+  #   value is not stored if block returns false or nil
+  #
+  def cache key = nil, &proc
+    unless key
+      if ::AppetiteConstants::RESPOND_TO__SOURCE_LOCATION # ruby1.9
+        key = proc.source_location
+      else # ruby1.8
+        key = proc.to_s.split('@').last
+      end
     end
-  else # ruby1.8
-    def cache key = nil, &proc
-      key ||= proc.to_s.split('@').last
-      cache_pool[key] ||= proc.call
-    end
+    cache_pool[key] || ( (val = proc.call) && (cache_pool[key] = val) )
   end
 
   def cache_pool
