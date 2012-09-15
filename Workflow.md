@@ -1077,6 +1077,8 @@ accept_ranges? 'bytes'
 
 Allow to cache the result of an arbitrary block and use the result on consequent requests.
 
+*Note: Value is not stored if block returns false or nil.*
+
 Cache can be cleared by calling `clear_cache!` method.
 
 If called without params, all cache will be cleared.
