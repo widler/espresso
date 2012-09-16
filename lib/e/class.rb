@@ -295,17 +295,16 @@ class << E
     # sorting hooks in DESCENDING order, so the ones with highest priority will run first
     def sort_hooks position, action = nil
       ((@hooks[position][:*] || []) + (@hooks[position][action] || [])).sort do |a,b|
-        ((b.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i <=>
-            ((a.to_s.scan(/hooks_priority_(_?\d+)_/)||[]).first||[]).first.sub('_', '-').to_i
-      end
+        b.first <=> a.first
+      end.map { |h| h.last }
     end
 
     def add_hook position, opts = {}, &proc
       return if locked? || proc.nil?
       initialize_hooks position
-      method = proc_to_method(:hooks, :priority, opts[:priority].to_i, position, *setup__actions, &proc)
+      method = proc_to_method(:hooks, position, *setup__actions, &proc)
       setup__actions.each do |a|
-        (@hooks[position][a] ||= []) << method
+        (@hooks[position][a] ||= []) << [opts[:priority].to_i, method]
       end
     end
 

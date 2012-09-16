@@ -180,6 +180,7 @@ class EApp
       end
       @wd = (wd.size > 0 ? wd.reject { |c| c.empty? }.join('/') << '/' : '').freeze
     end
+    alias cd chdir
 
     def opts_to_s opts
       (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
