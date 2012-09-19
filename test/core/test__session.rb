@@ -49,7 +49,7 @@ module ECoreTest__Session
 
   Spec.new App do
     app EApp.new { session :memory }.mount(App)
-    map App.route
+    map App.base_url
 
     var, val = 2.times.map { rand.to_s }
     get :set, var, val
