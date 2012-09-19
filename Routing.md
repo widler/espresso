@@ -384,34 +384,25 @@ end
 ## RESTful Actions
 
 
-By default, defined actions will respond only to GET request method.
+By default, verbless actions will respond to any request method.
 
-**Example:** - `index` action will respond only to GET request method
+**Example:** - `index` action responding to any request method
 
 ```ruby
 class App < E
-
-    def get_index
-    end
-
-    # or simply
 
     def index
     end
 end
 ```
 
-To make an action to respond to a specific request method,
-prepend desired request method to action name.
+To make an action to respond only to a specific request method,
+simply prepend desired request method verb to action name.
 
 **Example:**
 
 ```ruby
 class App < E
-
-    def news       # will serve GET /news
-        # ...
-    end
 
     def post_news  # will serve POST /news
         # ...
