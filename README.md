@@ -351,18 +351,19 @@ app.run
 RESTful Actions
 ---
 
-By default, defined actions will respond only to GET requests.
+By default, verbless actions will respond to any request type.
 
-To make some action respond to another request type,
+To make some action to respond only to some request type,
 simply prepend the corresponding verb to the action name.
 
 ```ruby
-# GET
-def get_book
+# will respond to any request type
+def book
     # ...
 end
-# or simply
-def book
+
+# GET
+def get_book
     # ...
 end
 
