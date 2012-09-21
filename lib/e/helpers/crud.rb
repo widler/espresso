@@ -2,6 +2,11 @@ class << E
 
   def crud resource, *path_or_opts, &proc
     opts = path_or_opts.last.is_a?(Hash) ? path_or_opts.pop : {}
+    if opts[:exclude]
+      opts[:exclude] = [ opts[:exclude] ] unless opts[:exclude].is_a?(Array)
+    else
+      opts[:exclude] = []
+    end
     path = path_or_opts.first
     action = '%s_' << (path || :index).to_s
     resource_method = {
@@ -18,7 +23,7 @@ class << E
     end
     update_object = lambda do |controller_instance, request_method, id|
       object = fetch_object.call(controller_instance, id)
-      object.send(resource_method[request_method], controller_instance.post_params)
+      object.send(resource_method[request_method], controller_instance.params.reject { |k,v| opts[:exclude].include?(k) })
       presenter.call controller_instance, object
     end
     self.class_exec do
@@ -32,7 +37,7 @@ class << E
       end
 
       define_method action % :post do
-        presenter.call self, resource.send(resource_method[:post], post_params)
+        presenter.call self, resource.send(resource_method[:post], params.reject { |k,v| opts[:exclude].include?(k) })
       end
 
       define_method action % :put do |id|

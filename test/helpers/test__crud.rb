@@ -44,7 +44,7 @@ module EHelpersTest__CRUD
       end
     end
 
-    crudify RESOURCE, &crudify
+    crudify RESOURCE, :exclude => ['excluded_param', 'skip_this'], &crudify
     crudify PRIVATE_RESOURCE, :private, &crudify
 
     setup :post_private, :put_private, :patch_private, :delete_private do
@@ -59,15 +59,17 @@ module EHelpersTest__CRUD
 
     def update request_method
       lambda do
-        key = RESOURCE.keys.last
+        key    = RESOURCE.keys.last
         record = RESOURCE[key].dup
-        name = rand.to_s
+        name   = rand.to_s
 
-        rsp = send request_method, key, :name => name
+        send request_method, key, :name => name, :excluded_param => 'blah', :skip_this => 'doh'
 
-        updated_record = RESOURCE[rsp.body]
+        updated_record = RESOURCE[last_response.body]
         expect(updated_record).is_a? Hash
         refute(updated_record['name']) == record['name']
+        is(updated_record['excluded_param']).nil?
+        is(updated_record['skip_this']).nil?
       end
     end
 
