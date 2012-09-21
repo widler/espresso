@@ -119,6 +119,7 @@ App.run
 
 [Intro](https://github.com/slivu/espresso/blob/master/CRUD.md#intro) |
 [Resource](https://github.com/slivu/espresso/blob/master/CRUD.md#resource) |
+[Excluded Params](https://github.com/slivu/espresso/blob/master/CRUD.md#excluded-params) |
 [Root](https://github.com/slivu/espresso/blob/master/CRUD.md#root) |
 [Response](https://github.com/slivu/espresso/blob/master/CRUD.md#response) |
 [Access Restriction](https://github.com/slivu/espresso/blob/master/CRUD.md#access-restriction)

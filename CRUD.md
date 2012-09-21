@@ -47,6 +47,28 @@ crudify ModelName, :post => :new
 
 **[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
 
+## Excluded Params
+
+By default all params will be sent to resource.
+
+Good enough, however sometimes you need to exclude some params.
+
+This is easily accomplished by using :exclude option.
+
+To exclude a single param, pass it as a string.
+
+```ruby
+crudify Resource, :exclude => '__stream_uuid__'
+```
+
+To exclude multiple params, pass them as an array.
+
+```ruby
+crudify Resource, :exclude => ['__stream_uuid__', 'user']
+```
+
+**[ [contents &uarr;](https://github.com/slivu/espresso#tutorial) ]**
+
 
 ## Root
 
