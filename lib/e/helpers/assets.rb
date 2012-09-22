@@ -74,7 +74,7 @@ class EApp
     #
     def assets_url url = nil, serve = nil
       if url
-        assets_url     = rootify_url(url)
+        assets_url     = url =~ /\A[\w|\d]+\:\/\// ? url : rootify_url(url)
         @assets_url    = (assets_url =~ /\/\Z/ ? assets_url : assets_url << '/').freeze
         @assets_server = true if serve
       end
