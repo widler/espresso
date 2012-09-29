@@ -21,7 +21,7 @@ namespace :test do
     session.run /ECoreTest/, :trace => true
     puts session.failures if session.failed?
     puts session.summary
-    session.exit_code
+    session.exit_code == 0 || fail
   end
 
   task :view do
@@ -38,7 +38,7 @@ namespace :test do
     session.run /EViewTest/, :trace => true
     puts session.failures if session.failed?
     puts session.summary
-    session.exit_code
+    session.exit_code == 0 || fail
   end
 
   task :helpers do
@@ -54,7 +54,7 @@ namespace :test do
     session.run /EHelpersTest/, :trace => true
     puts session.failures if session.failed?
     puts session.summary
-    session.exit_code
+    session.exit_code == 0 || fail
   end
 end
 
