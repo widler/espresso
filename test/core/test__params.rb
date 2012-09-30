@@ -2,12 +2,15 @@ module ECoreTest__Params
 
   class App < E
 
+    before { params['initializing'] = 'params' }
+
+
     def index
-      self.GET['var']
+      [get_params['var'], get_params[:var]].join
     end
 
     def post_index
-      self.POST['var']
+      [post_params['var'], post_params[:var]].join
     end
 
     def mixed
@@ -20,11 +23,11 @@ module ECoreTest__Params
 
     val = rand.to_s
     r = get :index, :var => val
-    expect(r.body) == val
+    expect(r.body) == val + val
 
     val = rand.to_s
     r = post :index, :var => val
-    expect(r.body) == val
+    expect(r.body) == val + val
 
     r = get :mixed, '?get=get', :post => 'post'
     expect(r.body) == 'get/get; post/post'
