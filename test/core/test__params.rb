@@ -6,11 +6,11 @@ module ECoreTest__Params
 
 
     def index
-      [get_params['var'], get_params[:var]].join
+      [params['var'], params[:var]].join
     end
 
     def post_index
-      [post_params['var'], post_params[:var]].join
+      [params['var'], params[:var]].join
     end
 
     def mixed
