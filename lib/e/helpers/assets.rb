@@ -86,7 +86,7 @@ class EApp
       @assets_server
     end
 
-    # used when app is serving assets.
+    # used when app is set to serve assets.
     # by default, Espresso will serve files found under public/ folder inside app root.
     # use `assets_path` at class level to set custom path.
     #
@@ -105,143 +105,117 @@ class EApp
 
   end
 
-  class AssetsHelper
+end
 
-    def initialize app
-      @app = app
-      @wd  = ''.freeze
-    end
+class E
 
-    def path
-      (fullpath = @app.assets_fullpath) ? fullpath : @app.assets_path
-    end
+  class EspressoFrameworkInstanceVariables
 
-    def url path = nil
-      '' << @app.assets_url << @wd << (path||'')
-    end
-
-    # please note that all controllers share same assets instance,
-    # so if you do `assets.chdir` in one controller 
-    # the change will be reflected in all controllers
-    #
-    # @example Slim engine
-    #
-    # - assets.chdir 'vendor'
-    # == script_tag 'jquery.js'
-    #
-    # - assets.chdir :bootstrap
-    # == script_tag 'js/bootstrap.min.js'
-    # == style_tag  'css/bootstrap.min.css'
-    # == style_tag  'css/bootstrap-responsive.min.css'
-    #
-    # - assets.chdir '../google-code-prettify'
-    # == script_tag 'prettify.js'
-    # == style_tag  'tomorrow-night-eighties.css'
-    #
-    # - assets.chdir '../noty'
-    # == script_tag 'jquery.noty.js'
-    # == script_tag 'layouts/top.js'
-    # == script_tag 'layouts/topRight.js'
-    # == script_tag 'themes/default.js'
-    #
-    # - assets.chdir '/'
-    # == script_tag 'master.js'
-    # == script_tag 'e-crudify-bootstrap.js'
-    # == style_tag  'master.css'
-    #
-    # will result in:
-    #
-    # <script src="/vendor/jquery.js" type="text/javascript"></script>
-    #
-    # <script src="/vendor/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-    # <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    # <link href="/vendor/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
-    #
-    # <script src="/vendor/google-code-prettify/prettify.js" type="text/javascript"></script>
-    # <link href="/vendor/google-code-prettify/tomorrow-night-eighties.css" rel="stylesheet" />
-    #
-    # <script src="/vendor/noty/jquery.noty.js" type="text/javascript"></script>
-    # <script src="/vendor/noty/layouts/top.js" type="text/javascript"></script>
-    # <script src="/vendor/noty/layouts/topRight.js" type="text/javascript"></script>
-    # <script src="/vendor/noty/themes/default.js" type="text/javascript"></script>
-    #
-    # <script src="/master.js" type="text/javascript"></script>
-    # <script src="/e-crudify-bootstrap.js" type="text/javascript"></script>
-    # <link href="/master.css" rel="stylesheet" />
-    #
-    def chdir path
-      path = path.to_s
-      return @wd = '' if path == '/'
-      wd, path = @wd.split('/'), path.split('/')
-      path.each do |c|
-        c.empty? && next
-        c == '..' && wd.pop && next
-        wd << c
-      end
-      @wd = (wd.size > 0 ? wd.reject { |c| c.empty? }.join('/') << '/' : '').freeze
-    end
-    alias cd chdir
-
-    def opts_to_s opts
+    def assets__opts_to_s opts
       (@assets_opts ||= {})[opts] = opts.keys.inject([]) do |f, k|
         f << '%s="%s"' % [k, ::CGI.escapeHTML(opts[k])]
       end.join(' ')
     end
   end
 
-  def assets
-    @assets_helper ||= AssetsHelper.new(self)
-  end
-end
-
-class E
-
-  def assets
-    self.class.app.assets
+  def assets_url path = nil
+    base = self.class.app.assets_url.dup
+    path ? base << path : base
   end
 
+  # handy method to load multiple assets from same path,
+  # avoiding typing same path multiple times.
+  #
+  # @example Assuming `assets_map` was set to /
+  #
+  #   load_assets 'master.js', 'styles.css'
+  #
+  # => <script src="/master.js" type="text/javascript"></script>
+  # => <link href="/styles.css" rel="stylesheet" />
+  #
+  # @example passing path to load assets from via :from option
+  #
+  #   load_assets 'jquery.js', 'reset.css', 'blah/doh.js', :from => 'vendor'
+  #
+  # => <script src="/vendor/jquery.js" type="text/javascript"></script>
+  # => <link href="/vendor/reset.css" rel="stylesheet" />
+  # => <script src="/vendor/blah/doh.js" type="text/javascript"></script>
+  #
+  # @note if path passed via :from option starting with a protocol or a slash, 
+  #       it is used as base URL, ignoring `assets_url` setup.
+  #
+  # @note please make sure the given path ending in a slash!
+  #       Espresso will not handle this automatically cause it is too expensive.
+  def load_assets *assets_and_opts
+    opts = assets_and_opts.last.is_a?(Hash) ? assets_and_opts.pop : {}
+    if base = opts[:from]
+      # using base URL only if given path does not start with a protocol or a slash
+      base = assets_url(base) unless base =~ /\A[\w|\d]+\:\/\/|\A\//
+    else
+      base = assets_url
+    end
+    html = ''
+    assets_and_opts.each do |asset|
+      ext = ::File.extname(asset)
+      src = base + asset
+      # passing URL as :src opt instead of first argument
+      # to avoid redundant `assets_url` calling
+      html << script_tag(:src => src ) if ext == '.js'
+      html << style_tag( :src => src ) if ext == '.css'
+    end
+    html
+  end
+
+  # building HTML script tag from given URL and opts.
+  # if passing URL as first argument, 
+  # it will be appended to the assets base URL, set via `assets_map` at app level.
+  # 
+  # if you want an unmapped URL, pass it via :src option.
+  # this will avoid `assets_map` setup and use the URL as is.
+  def script_tag src = nil, opts = {}, &proc
+    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
+    opts[:type] ||= 'text/javascript'
+    if proc
+      "<script %s>\n%s\n</script>\n" % [__e__.assets__opts_to_s(opts), proc.call]
+    else
+      opted_src = opts.delete(:src)
+      src ||= opted_src || raise('Please provide script URL as first argument or via :src option')
+      "<script src=\"%s\" %s></script>\n" % [
+        opted_src ? opted_src : assets_url(src),
+        __e__.assets__opts_to_s(opts)
+      ]
+    end
+  end
+
+  # same as `script_tag`, except it building an style/link tag
+  def style_tag src = nil, opts = {}, &proc
+    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
+    if proc
+      opts[:type] ||= 'text/css'
+      "<style %s>\n%s\n</style>\n" % [__e__.assets__opts_to_s(opts), proc.call]
+    else
+      opts[:rel] = 'stylesheet'
+      opted_src = opts.delete(:href) || opts.delete(:src)
+      src ||= opted_src || raise('Please URL as first argument or :href option')
+      "<link href=\"%s\" %s />\n" % [
+        opted_src ? opted_src : assets_url(src),
+        __e__.assets__opts_to_s(opts)
+      ]
+    end
+  end
+
+  # builds and HTML img tag.
+  # URLs are resolved exactly as per `script_tag` and `style_tag`
   def image_tag src = nil, opts = {}
     src.is_a?(Hash) && (opts = src.dup) && (src = nil)
     opted_src = opts.delete(:src)
     src ||= opted_src || raise('Please provide image URL as first argument or :src option')
     opts[:alt] ||= ::File.basename(src, ::File.extname(src))
     "<img src=\"%s\" %s />\n" % [
-        opted_src ? opted_src : assets.url(src),
-        assets.opts_to_s(opts)
-      ]
+      opted_src ? opted_src : assets_url(src),
+      __e__.assets__opts_to_s(opts)
+    ]
   end
-
   alias img_tag image_tag
-
-  def script_tag src = nil, opts = {}, &proc
-    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
-    opts[:type] ||= 'text/javascript'
-    if proc
-      "<script %s>\n%s\n</script>\n" % [assets.opts_to_s(opts), proc.call]
-    else
-      opted_src = opts.delete(:src)
-      src ||= opted_src || raise('Please provide script URL as first argument or via :src option')
-      "<script src=\"%s\" %s></script>\n" % [
-          opted_src ? opted_src : assets.url(src),
-          assets.opts_to_s(opts)
-        ]
-    end
-  end
-
-  def style_tag src = nil, opts = {}, &proc
-    src.is_a?(Hash) && (opts = src.dup) && (src = nil)
-    if proc
-      opts[:type] ||= 'text/css'
-      "<style %s>\n%s\n</style>\n" % [assets.opts_to_s(opts), proc.call]
-    else
-      opts[:rel] = 'stylesheet'
-      opted_src = opts.delete(:href) || opts.delete(:src)
-      src ||= opted_src || raise('Please URL as first argument or :href option')
-      "<link href=\"%s\" %s />\n" % [
-          opted_src ? opted_src : assets.url(src),
-          assets.opts_to_s(opts)
-        ]
-    end
-  end
 
 end
