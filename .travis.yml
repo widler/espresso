@@ -8,3 +8,4 @@ rvm:
 notifications:
   email:
     - slivuz@gmail.com
+script: bundle exec rake --verbose --trace
