@@ -4,7 +4,10 @@ rvm:
   - 1.9.2
   - 1.9.3
   - jruby-18mode
-  - jruby-19mode
+  # - jruby-19mode it fails with 
+  #                "undefined local variable or method `uri' for #<Rack::Auth::Digest::Request:0x7d3bdd>"
+  #                on Travis "(Java HotSpot(TM) Server VM 1.7.0_07) [linux-i386-java]"
+  #                though on "OpenJDK 64-Bit Server VM 1.6.0_24" is passing well
   - ree
 notifications:
   email:
