@@ -43,15 +43,15 @@ class E
   end
 
   def params
-    @__e__params ||= indifferent_params(orig_params)
+    __e__.params ||= indifferent_params(orig_params)
   end
 
   def get_params
-    @__e__get_params ||= indifferent_params(self.GET)
+    __e__.get_params ||= indifferent_params(self.GET)
   end
 
   def post_params
-    @__e__post_params ||= indifferent_params(self.POST)
+    __e__.post_params ||= indifferent_params(self.POST)
   end
 
   %w[ session flash cookies ].each do |m|

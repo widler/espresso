@@ -3,7 +3,7 @@ module ECoreTest__Params
   class App < E
 
     def index
-      [get_params['var'], get_params[:var]].join
+      self.GET['var']
     end
 
     def post_index
@@ -20,7 +20,7 @@ module ECoreTest__Params
 
     val = rand.to_s
     r = get :index, :var => val
-    expect(r.body) == val + val
+    expect(r.body) == val
 
     val = rand.to_s
     r = post :index, :var => val
