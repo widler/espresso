@@ -7,7 +7,7 @@ module ECoreTest__Params
     end
 
     def post_index
-      [post_params['var'], post_params[:var]].join
+      self.POST['var']
     end
 
     def mixed
@@ -24,7 +24,7 @@ module ECoreTest__Params
 
     val = rand.to_s
     r = post :index, :var => val
-    expect(r.body) == val + val
+    expect(r.body) == val
 
     r = get :mixed, '?get=get', :post => 'post'
     expect(r.body) == 'get/get; post/post'
