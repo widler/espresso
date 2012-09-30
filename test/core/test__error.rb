@@ -30,7 +30,7 @@ module ECoreTest__Error
 
   end
 
-  Spec.new App do
+  Spec.new App, :skip => true do
 
     Testing 404 do
       r = get :blah!
