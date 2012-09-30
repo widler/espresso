@@ -37,7 +37,6 @@ module ECoreTest__Auth
 
       r = get :basic
       expect(r.status) == 200
-      is?(r.body) == 'basic'
 
       reset_basic_auth!
 
@@ -55,7 +54,6 @@ module ECoreTest__Auth
 
       r = post :basic
       expect(r.status) == 200
-      is?(r.body) == 'post_basic'
 
       reset_basic_auth!
 
@@ -74,7 +72,6 @@ module ECoreTest__Auth
 
       r = get :digest
       expect(r.status) == 200
-      is?(r.body) == 'digest'
 
       reset_digest_auth!
 
@@ -93,7 +90,6 @@ module ECoreTest__Auth
 
       r = post :digest
       expect(r.status) == 200
-      is?(r.body) == 'post_digest'
 
       reset_digest_auth!
 

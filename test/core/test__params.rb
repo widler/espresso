@@ -14,7 +14,6 @@ module ECoreTest__Params
       '%s/%s; %s/%s' % [params[:get], params['get'], params[:post], params['post']]
     end
 
-
   end
 
   Spec.new App do
