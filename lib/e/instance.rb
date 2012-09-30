@@ -1,6 +1,6 @@
 class E
 
-  alias orig_params params
+  alias orig_params  params
   alias orig_cookies cookies
 
   # overriding Appetite's action invocation
@@ -44,14 +44,6 @@ class E
 
   def params
     __e__.params ||= indifferent_params(orig_params)
-  end
-
-  def get_params
-    __e__.get_params ||= indifferent_params(self.GET)
-  end
-
-  def post_params
-    __e__.post_params ||= indifferent_params(self.POST)
   end
 
   %w[ session flash cookies ].each do |m|
@@ -635,8 +627,7 @@ class E
 
     include ::Rack::Utils
 
-    attr_accessor :response,
-                  :params, :get_params, :post_params,
+    attr_accessor :response, :params,
                   :accept, :accept_charset, :accept_encoding, :accept_language, :accept_ranges,
                   :explicit_charset
 

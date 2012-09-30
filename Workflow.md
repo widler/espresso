@@ -202,10 +202,6 @@ Index[:blah]
 
 `params` - a mix of GET and POST params. Can be accessed by both symbol and string keys.
 
-`get_params` - GET params
-
-`post_params` - POST params
-
 **Example:**
 
 ```ruby

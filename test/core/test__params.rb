@@ -2,9 +2,6 @@ module ECoreTest__Params
 
   class App < E
 
-    before { params['initializing'] = 'params' }
-
-
     def index
       [params['var'], params[:var]].join
     end

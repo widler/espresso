@@ -7,9 +7,9 @@
 <pre>
 <b>Request                        Resource</b>
 GET     /id                    #get(id)
-POST    /   with POST data     #create(post_params)
-PUT     /id with POST data     #get(id).update(post_params)
-PATCH   /id with POST data     #get(id).update(post_params)
+POST    /   with POST data     #create(params)
+PUT     /id with POST data     #get(id).update(params)
+PATCH   /id with POST data     #get(id).update(params)
 DELETE  /id                    #get(id).delete OR #delete(id)
 HEAD    /id                    #get(id)
 OPTIONS /                      returns actions available to client
