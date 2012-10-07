@@ -1,10 +1,12 @@
 <a href="http://e.github.com/">
 <img src="http://e.github.com/images/logo.png" align="right" /></a>
 
-<h1>
-<a href="http://e.github.com/">Espresso</a>
-</h1>
-<strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
+# [Espresso](http://e.github.com)
+
+**Scalable Web Framework aimed at Speed and Simplicity**
+<br/>
+<br/>
+<br/>
 
 Quick Start
 ---
