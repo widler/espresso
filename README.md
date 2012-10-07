@@ -1,21 +1,14 @@
+<a href="http://e.github.com/">
+<img src="http://e.github.com/images/logo.png" align="right" /></a>
 
-<table width="100%">
-    <tr>
-        <td>
-            <a href="http://e.github.com/">
-            <img src="http://e.github.com/images/logo.png" /></a>
-        </td>
-        <td>
-            <h2>
-                <a href="http://e.github.com/">
-                Espresso</a></h2>
-            <strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
-            <p>
-                <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
-            </p>
-        </td>
-    </tr>
-</table>
+<h1>
+<a href="http://e.github.com/">Espresso</a>
+</h1>
+<strong>Scalable Web Framework aimed at Speed and Simplicity</strong>
+<p>
+    <a href="http://travis-ci.org/slivu/espresso"><img src="https://secure.travis-ci.org/slivu/espresso.png" alt="Build Status" style="max-width:100%;"></a>
+</p>
+
 
 Quick Start
 ---
